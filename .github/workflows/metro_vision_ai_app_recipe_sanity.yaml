@@ -75,13 +75,7 @@ jobs:
           sudo apt-get install -y python3-nose libxml2-utils vlc
       - name: Sanity Test
         run: |
-          sudo apt-get update
-          pip install --ignore-installed robotframework
-          pip install --upgrade pip || true
-          lspci | grep -i vga
           
-          pip install --ignore-installed selenium 
-          pip install --ignore-installed  PyYAML
           cd edge-ai-suites-repo/metro-ai-suite/metro-vision-ai-app-recipe/test-suite/robot_files
           robot test.robot || true  &
           sleep 480
