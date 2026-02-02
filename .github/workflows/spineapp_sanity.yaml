@@ -73,7 +73,7 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
     - name: Install Robot Framework with pip (cached)
-      run: pip install robotframework selenium
+      run: pip3 install robotframework selenium PyYAML
     - name: Install required packages
       run: |
         sudo apt-get update
