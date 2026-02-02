@@ -11,9 +11,14 @@ This section provides instructions for setting up alerts in **Time Series Analyt
 The following MQTT alerts are configured for both `Wind Turbine Anomaly Detection`
 and `Weld Anomaly Detection` sample apps
 
+<!--hide_directive
 ::::{tab-set}
-:::{tab-item} **Wind Turbine Anomaly Detection**
+:::{tab-item} hide_directive--> **Wind Turbine Anomaly Detection**
+<!--hide_directive
 :sync: tab1
+hide_directive-->
+
+
 
 [wind-turbine-anomaly-detection/time-series-analytics-config/config.json](
 https://github.com/open-edge-platform/edge-ai-suites/blob/main/manufacturing-ai-suite/industrial-edge-insights-time-series/apps/wind-turbine-anomaly-detection/time-series-analytics-config/config.json)
@@ -28,9 +33,12 @@ https://github.com/open-edge-platform/edge-ai-suites/blob/main/manufacturing-ai-
    }
  ```
 
+<!--hide_directive
 :::
-:::{tab-item} **Weld Anomaly Detection**
+:::{tab-item} hide_directive--> **Weld Anomaly Detection**
+<!--hide_directive
 :sync: tab2
+hide_directive-->
 
 [weld-anomaly-detection/time-series-analytics-config/config.json](
 https://github.com/open-edge-platform/edge-ai-suites/blob/main/manufacturing-ai-suite/industrial-edge-insights-time-series/apps/weld-anomaly-detection/time-series-analytics-config/config.json)
@@ -45,8 +53,11 @@ https://github.com/open-edge-platform/edge-ai-suites/blob/main/manufacturing-ai-
    }
  ```
 
+<!--hide_directive
 :::
 ::::
+hide_directive-->
+
 
 #### Configure MQTT Alert in TICK Script
 
@@ -54,9 +65,13 @@ The following code snippets show how to add the MQTT, if not
 already added, to `Wind Turbine Anomaly Detection` and `Weld Anomaly Detection`
 sample apps. The TICK script has the following configuration done by default.
 
+<!--hide_directive
 ::::{tab-set}
-:::{tab-item} **Wind Turbine Anomaly Detection**
+:::{tab-item} hide_directive-->**Wind Turbine Anomaly Detection**
+<!--hide_directive
 :sync: tab1
+hide_directive-->
+
 
 [wind-turbine-anomaly-detection/time-series-analytics-config/tick_scripts/windturbine_anomaly_detector.tick](
 https://github.com/open-edge-platform/edge-ai-suites/blob/main/manufacturing-ai-suite/industrial-edge-insights-time-series/apps/wind-turbine-anomaly-detection/time-series-analytics-config/tick_scripts/windturbine_anomaly_detector.tick)
@@ -72,9 +87,15 @@ data0
             .qos(1)
 ```
 
+<!--hide_directive
+
 :::
-:::{tab-item} **Weld Anomaly Detection**
+:::{tab-item} hide_directive-->**Weld Anomaly Detection**
+
+<!--hide_directive
 :sync: tab2
+hide_directive-->
+
 
 [weld-anomaly-detection/time-series-analytics-config/tick_scripts/weld_anomaly_detector.tick](
 https://github.com/open-edge-platform/edge-ai-suites/blob/main/manufacturing-ai-suite/industrial-edge-insights-time-series/apps/weld-anomaly-detection/time-series-analytics-config/tick_scripts/weld_anomaly_detector.tick)
@@ -90,11 +111,13 @@ data0
             .qos(1)
 ```
 
+<!--hide_directive
 :::
 ::::
+hide_directive-->
 
-> **Note**: Setting **QoS** to `1` ensures messages are delivered at least once.
-> Alerts are preserved and resent if the MQTT broker reconnects after downtime.
+> **Note:** Setting **QoS** to `1` ensures messages are delivered at least once.
+> Alerts are preserved and re-sent if the MQTT broker reconnects after downtime.
 
 ### Docker - Subscribe to MQTT Alerts
 
@@ -108,10 +131,12 @@ docker exec -ti ia-mqtt-broker mosquitto_sub -h localhost -v -t '#' -p 1883
 
 - To subscribe to a specific MQTT topic, such as `alerts/wind_turbine`, use the following command.
   Note that the topic information can be found in the TICK Script.
-
+  <!--hide_directive
   ::::{tab-set}
-  :::{tab-item} **Wind Turbine Anomaly Detection**
+  :::{tab-item} hide_directive--> **Wind Turbine Anomaly Detection**
+  <!--hide_directive
   :sync: tab1
+  hide_directive-->
 
   [wind-turbine-anomaly-detection/time-series-analytics-config/tick_scripts/windturbine_anomaly_detector.tick](
   https://github.com/open-edge-platform/edge-ai-suites/blob/main/manufacturing-ai-suite/industrial-edge-insights-time-series/apps/wind-turbine-anomaly-detection/time-series-analytics-config/tick_scripts/windturbine_anomaly_detector.tick)
@@ -119,10 +144,12 @@ docker exec -ti ia-mqtt-broker mosquitto_sub -h localhost -v -t '#' -p 1883
   ```bash
   docker exec -ti ia-mqtt-broker mosquitto_sub -h localhost -v -t alerts/wind_turbine -p 1883
   ```
-
+  <!--hide_directive
   :::
-  :::{tab-item} **Weld Anomaly Detection**
+  :::{tab-item} hide_directive--> **Weld Anomaly Detection**
+  <!--hide_directive
   :sync: tab2
+  hide_directive-->
 
   [weld-anomaly-detection/time-series-analytics-config/tick_scripts/weld_anomaly_detector.tick](
   https://github.com/open-edge-platform/edge-ai-suites/blob/main/manufacturing-ai-suite/industrial-edge-insights-time-series/apps/weld-anomaly-detection/time-series-analytics-config/tick_scripts/weld_anomaly_detector.tick)
@@ -131,12 +158,14 @@ docker exec -ti ia-mqtt-broker mosquitto_sub -h localhost -v -t '#' -p 1883
   docker exec -ti ia-mqtt-broker mosquitto_sub -h localhost -v -t alerts/weld_defects -p 1883
   ```
 
-  :::
-  ::::
+<!--hide_directive
+:::
+::::
+hide_directive-->
 
 ### Docker - Publish OPC-UA Alerts
 
-> **Note**:
+> **Note:**
 > This section is applicable to Wind Turbine Anomaly Dectection sample app only.
 > In other words, OPC UA alerts are not supported for Weld Anomaly Detection sample app.
 
@@ -154,9 +183,12 @@ To enable OPC-UA alerts in `Time Series Analytics Microservice`, use the followi
 The following code snippets show how to add the OPC-UA alert, if not
 already added, replace this in place of MQTT alert section in the TICK script.
 
+<!--hide_directive
 ::::{tab-set}
-:::{tab-item} **Wind Turbine Anomaly Detection**
+:::{tab-item} hide_directive-->**Wind Turbine Anomaly Detection**
+<!--hide_directive
 :sync: tab1
+hide_directive-->
 
 [wind-turbine-anomaly-detection/time-series-analytics-config/tick_scripts/windturbine_anomaly_detector.tick](
 https://github.com/open-edge-platform/edge-ai-suites/blob/main/manufacturing-ai-suite/industrial-edge-insights-time-series/apps/wind-turbine-anomaly-detection/time-series-analytics-config/tick_scripts/windturbine_anomaly_detector.tick)
@@ -171,9 +203,12 @@ data0
         .timeout(30s)
 ```
 
+<!--hide_directive
 :::
-:::{tab-item} **Weld Anomaly Detection**
+:::{tab-item} hide_directive--> **Weld Anomaly Detection**
+<!--hide_directive
 :sync: tab2
+hide_directive-->
 
 [weld-anomaly-detection/time-series-analytics-config/tick_scripts/weld_anomaly_detector.tick](
 https://github.com/open-edge-platform/edge-ai-suites/blob/main/manufacturing-ai-suite/industrial-edge-insights-time-series/apps/weld-anomaly-detection/time-series-analytics-config/tick_scripts/weld_anomaly_detector.tick)
@@ -189,21 +224,27 @@ data0
             .qos(1)
 ```
 
+<!--hide_directive
 :::
 ::::
+hide_directive-->
 
-> **Note**:
+> **Note:**
 >
 > - The `noRecoveries()` method suppresses recovery alerts, ensuring only critical alerts are sent.
-> - If doing a Helm-based deployment on a Kubernetes cluster, after making changes to the tick script, copy the UDF deployment package using [step](../how-to-guides/how-to-deploy-with-helm.md#copy-the-windturbine_anomaly_detection-udf-package-for-helm-deployment-to-time-series-analytics-microservice).
+> - If doing a Helm-based deployment on a Kubernetes cluster, after making changes to the TICKscript, copy the UDF deployment package using [step 4](../how-to-guides/how-to-deploy-with-helm.md#step-4--copy-the-udf-package-for-helm-deployment-to-time-series-analytics-microservice).
 
 #### 2. Configuring OPC-UA Alert in config.json
 
-Make the following REST API call to the Time Series Analytics microservice. Note that the `mqtt` alerts key is replaced with the `opcua` key and its specific details:
+Make the following REST API call to the Time Series Analytics microservice. Note that the
+`mqtt` alerts key is replaced with the `opcua` key and its specific details:
 
+<!--hide_directive
 ::::{tab-set}
-:::{tab-item} **Wind Turbine Anomaly Detection**
+:::{tab-item} hide_directive--> **Wind Turbine Anomaly Detection**
+<!--hide_directive
 :sync: tab1
+hide_directive-->
 
 [wind-turbine-anomaly-detection/time-series-analytics-config/config.json](
 https://github.com/open-edge-platform/edge-ai-suites/blob/main/manufacturing-ai-suite/industrial-edge-insights-time-series/apps/wind-turbine-anomaly-detection/time-series-analytics-config/config.json)
@@ -229,9 +270,13 @@ curl -k -X 'POST' \
 }'
 ```
 
+<!--hide_directive
 :::
-:::{tab-item} **Weld Anomaly Detection**
+:::{tab-item} hide_directive--> **Weld Anomaly Detection**
+<!--hide_directive
 :sync: tab2
+hide_directive-->
+
 
 [weld-anomaly-detection/time-series-analytics-config/config.json](
 https://github.com/open-edge-platform/edge-ai-suites/blob/main/manufacturing-ai-suite/industrial-edge-insights-time-series/apps/weld-anomaly-detection/time-series-analytics-config/config.json)
@@ -256,12 +301,14 @@ curl -k -X 'POST' \
 }'
 ```
 
+<!--hide_directive
 :::
 ::::
+hide_directive-->
 
 ### Docker - Subscribe to OPC UA Alerts using Sample OPCUA Subscriber
 
-1. Install python packages `asyncio` and `asyncua` to run the sample OPC UA subscriber
+1. Install Python packages `asyncio` and `asyncua` to run the sample OPC UA subscriber
 
    ```bash
    pip install asyncio asyncua
@@ -315,24 +362,32 @@ To subscribe to MQTT topics in a Helm deployment, execute the following command:
 
 - To subscribe to MQTT topic such as `alerts/wind_turbine`, use the following command:
 
+  <!--hide_directive
   ::::{tab-set}
-  :::{tab-item} **Wind Turbine Anomaly Detection**
+  :::{tab-item} hide_directive--> **Wind Turbine Anomaly Detection**
+  <!--hide_directive
   :sync: tab1
+  hide_directive-->
 
   ```bash
   kubectl exec -it -n ts-sample-app <mqtt_broker_pod_name> -- mosquitto_sub -h localhost -v -t alerts/wind_turbine -p 1883
   ```
 
+  <!--hide_directive
   :::
-  :::{tab-item} **Weld Anomaly Detection**
+  :::{tab-item} hide_directive--> **Weld Anomaly Detection**
+  <!--hide_directive
   :sync: tab2
+  hide_directive-->
 
   ```bash
   kubectl exec -it -n ts-sample-app <mqtt_broker_pod_name> -- mosquitto_sub -h localhost -v -t alerts/weld_defects -p 1883
   ```
 
-  :::
-  ::::
+<!--hide_directive
+:::
+::::
+hide_directive-->
 
 ### Helm - Publish OPC-UA Alerts
 
@@ -346,15 +401,18 @@ To enable OPC-UA alerts in `Time Series Analytics Microservice`, please follow b
 
 1. Configuring OPC-UA Alert in TICK Script
 
-   Configure the tick script by following [these instructions](#1-configure-opc-ua-alert-in-tick-script).
+   Configure the TICK script by following [these instructions](#1-configure-opc-ua-alert-in-tick-script).
 
-2. Copying the TICK script
+2. Copying the TICK Script
 
    Copy the TICK script using the following commands:
 
+   <!--hide_directive
    ::::{tab-set}
-   :::{tab-item} **Wind Turbine Anomaly Detection**
+   :::{tab-item} hide_directive--> **Wind Turbine Anomaly Detection**
+   <!--hide_directive
    :sync: tab1
+   hide_directive-->
 
    ```sh
    cd edge-ai-suites/manufacturing-ai-suite/industrial-edge-insights-time-series/apps/wind-turbine-anomaly-detection # path relative to git  clone   folder
@@ -368,9 +426,12 @@ To enable OPC-UA alerts in `Time Series Analytics Microservice`, please follow b
    kubectl cp $SAMPLE_APP $POD_NAME:/tmp/ -n ts-sample-app
    ```
 
-   :::
-   :::{tab-item} **Weld Anomaly Detection**
-   :sync: tab2
+  <!--hide_directive
+  :::{tab-set}
+  :::{tab-item} hide_directive--> **Weld Anomaly Detection**
+  <!--hide_directive
+  :sync: tab2
+  hide_directive-->
 
    ```sh
    cd edge-ai-suites/manufacturing-ai-suite/industrial-edge-insights-time-series/apps/weld-anomaly-detection # path relative to git clone   folder
@@ -384,16 +445,21 @@ To enable OPC-UA alerts in `Time Series Analytics Microservice`, please follow b
    kubectl cp $SAMPLE_APP $POD_NAME:/tmp/ -n ts-sample-app
    ```
 
-   :::
-   ::::
+  <!--hide_directive
+  :::
+  ::::
+  hide_directive-->
 
-3. Configuring OPC-UA Alert in config.json
+3. Configuring OPC-UA Alert in `config.json`
 
    Make the following REST API call to the Time Series Analytics microservice. Note that the `mqtt` alerts key is replaced with the `opcua` key and its specific details:
 
+   <!--hide_directive
    ::::{tab-set}
-   :::{tab-item} **Wind Turbine Anomaly Detection**
+   :::{tab-item} hide_directive--> **Wind Turbine Anomaly Detection**
+   <!--hide_directive
    :sync: tab1
+   hide_directive-->
 
    [wind-turbine-anomaly-detection/time-series-analytics-config/config.json](
    https://github.com/open-edge-platform/edge-ai-suites/blob/main/manufacturing-ai-suite/industrial-edge-insights-time-series/apps/wind-turbine-anomaly-detection/time-series-analytics-config/config.json)
@@ -419,9 +485,12 @@ To enable OPC-UA alerts in `Time Series Analytics Microservice`, please follow b
    }'
    ```
 
+   <!--hide_directive
    :::
-   :::{tab-item} **Weld Anomaly Detection**
+   :::{tab-item} hide_directive--> **Weld Anomaly Detection**
+   <!--hide_directive
    :sync: tab2
+   hide_directive-->
 
    [weld-anomaly-detection/time-series-analytics-config/config.json](
    https://github.com/open-edge-platform/edge-ai-suites/blob/main/manufacturing-ai-suite/industrial-edge-insights-time-series/apps/weld-anomaly-detection/time-series-analytics-config/config.json)
@@ -447,8 +516,10 @@ To enable OPC-UA alerts in `Time Series Analytics Microservice`, please follow b
    }'
    ```
 
-   :::
-   ::::
+   <!--hide_directive
+  :::
+  ::::
+  hide_directive-->
 
 ### Helm - Subscribe to OPC UA Alerts using Sample OPCUA Subscriber
 

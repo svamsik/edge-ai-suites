@@ -40,6 +40,41 @@ git clone https://github.com/open-edge-platform/edge-ai-suites.git
 cd edge-ai-suites/metro-ai-suite/metro-vision-ai-app-recipe/
 ```
 
+Optional: Pull the helm chart and replace the existing helm-chart folder with it
+    - Note: The helm chart should be downloaded when you are not using the helm chart provided in `edge-ai-suites/metro-ai-suite/metro-vision-ai-app-recipe/smart-intersection/chart`
+
+```bash
+# Navigate to Smart Intersection directory
+cd smart-intersection
+
+# Download helm chart with the following command
+helm pull oci://registry-1.docker.io/intel/smart-intersection --version 1.17.0
+
+# unzip the package using the following command
+tar -xvf smart-intersection-1.17.0.tgz
+
+# Replace the helm directory
+rm -rf chart && mv smart-intersection chart
+
+cd ..
+```
+
+### Step 2: Set up passwords
+
+#### Set Admin and Postgress Passwords
+
+These passwords need to be set before deployment. You can set them in the values.yaml file.
+```bash
+# Edit the values.yaml file to set your external IP
+nano ./smart-intersection/chart/values.yaml
+```
+Find the following sections and update them with your desired passwords:
+
+```yaml
+supass: <YOUR_ADMIN_PASSWORD>  # Admin password for Smart Intersection
+pgpass: <YOUR_POSTGRES_PASSWORD>  # Postgres password for Smart Intersection
+```
+
 ### Step 2: Configure External IP and Proxy Settings
 
 #### Configure External IP (Required)
@@ -120,12 +155,9 @@ kubectl wait --for=condition=ready pod --all -n smart-intersection --timeout=300
 ### Smart Intersection Application UI
 - **URL**: `https://<HOST_IP>:30443/`
 - **Username**: `admin`
-- **Password**: Get from secrets:
-  ```bash
-  kubectl get secret smart-intersection-supass-secret -n smart-intersection -o jsonpath='{.data.supass}' | base64 -d && echo
-  ```
+- **Password**: <YOUR_ADMIN_PASSWORD> (set in values.yaml)
 
-### Grafana Dashboard  
+### Grafana Dashboard
 - **URL**: `https://<HOST_IP>:30443/grafana/`
 - **Username**: `admin`
 - **Password**: `admin`
