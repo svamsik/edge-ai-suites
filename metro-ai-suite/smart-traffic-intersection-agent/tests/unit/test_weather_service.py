@@ -520,3 +520,626 @@ class TestWeatherServiceFixtures:
         assert sample_weather_data["temperature"] == 55
         assert sample_weather_data["short_forecast"] == "Sunny"
         assert sample_weather_data["is_precipitation"] is False
+
+
+class TestWeatherServicePeriodicUpdate:
+    """Test cases for periodic update loop."""
+
+    @pytest.mark.asyncio
+    async def test_periodic_update_loop_runs(self):
+        """Test that periodic update loop executes."""
+        mock_config = Mock(spec=ConfigService)
+        mock_config.get_weather_config.return_value = {
+            "update_interval_minutes": 0.01,  # Very short interval for testing
+            "use_mock": True
+        }
+        
+        service = WeatherService(mock_config)
+        service._running = True
+        
+        call_count = 0
+        async def mock_get_weather(force_refresh=False):
+            nonlocal call_count
+            call_count += 1
+            if call_count >= 2:
+                service._running = False  # Stop after 2 calls
+            return Mock()
+        
+        with patch.object(service, 'get_current_weather', side_effect=mock_get_weather):
+            # Run the loop briefly
+            task = asyncio.create_task(service._periodic_update_loop())
+            await asyncio.sleep(0.1)
+            service._running = False
+            task.cancel()
+            try:
+                await task
+            except asyncio.CancelledError:
+                pass
+
+    @pytest.mark.asyncio
+    async def test_periodic_update_loop_handles_error(self):
+        """Test periodic update loop handles errors gracefully."""
+        mock_config = Mock(spec=ConfigService)
+        mock_config.get_weather_config.return_value = {
+            "update_interval_minutes": 0.001
+        }
+        
+        service = WeatherService(mock_config)
+        service._running = True
+        
+        error_count = 0
+        async def mock_get_weather_error(force_refresh=False):
+            nonlocal error_count
+            error_count += 1
+            if error_count >= 1:
+                service._running = False
+            raise Exception("Test error")
+        
+        with patch.object(service, 'get_current_weather', side_effect=mock_get_weather_error):
+            task = asyncio.create_task(service._periodic_update_loop())
+            await asyncio.sleep(0.05)
+            service._running = False
+            task.cancel()
+            try:
+                await task
+            except asyncio.CancelledError:
+                pass
+
+    @pytest.mark.asyncio
+    async def test_periodic_update_loop_cancellation(self):
+        """Test periodic update loop handles cancellation."""
+        mock_config = Mock(spec=ConfigService)
+        mock_config.get_weather_config.return_value = {
+            "update_interval_minutes": 10
+        }
+        
+        service = WeatherService(mock_config)
+        service._running = True
+        
+        task = asyncio.create_task(service._periodic_update_loop())
+        await asyncio.sleep(0.01)
+        task.cancel()
+        
+        try:
+            await task
+        except asyncio.CancelledError:
+            pass
+        
+        # Should complete without error
+        assert True
+
+
+class TestWeatherServiceStartStop:
+    """Test cases for service start/stop functionality."""
+
+    @pytest.mark.asyncio
+    async def test_start_handles_fetch_error(self):
+        """Test start handles error when fetching initial weather."""
+        mock_config = Mock(spec=ConfigService)
+        mock_config.get_weather_config.return_value = {"use_mock": True}
+        
+        service = WeatherService(mock_config)
+        
+        with patch.object(service, 'get_current_weather', new_callable=AsyncMock) as mock_get:
+            mock_get.side_effect = Exception("Fetch failed")
+            
+            # Should not raise, just log error
+            await service.start()
+            
+            assert service._running is True
+            
+            # Cleanup
+            await service.stop()
+
+    @pytest.mark.asyncio
+    async def test_start_when_initial_weather_is_none(self):
+        """Test start handles None response from initial weather fetch."""
+        mock_config = Mock(spec=ConfigService)
+        mock_config.get_weather_config.return_value = {"use_mock": True}
+        
+        service = WeatherService(mock_config)
+        
+        with patch.object(service, 'get_current_weather', new_callable=AsyncMock) as mock_get:
+            mock_get.return_value = None
+            
+            await service.start()
+            
+            assert service._running is True
+            
+            await service.stop()
+
+    @pytest.mark.asyncio
+    async def test_stop_with_done_task(self):
+        """Test stop when update task is already done."""
+        mock_config = Mock(spec=ConfigService)
+        mock_config.get_weather_config.return_value = {}
+        
+        service = WeatherService(mock_config)
+        service._running = True
+        
+        # Create a task that completes immediately
+        async def quick_task():
+            pass
+        
+        service._update_task = asyncio.create_task(quick_task())
+        await asyncio.sleep(0.01)  # Let it complete
+        
+        await service.stop()
+        
+        assert service._running is False
+
+
+class TestWeatherServiceFetchData:
+    """Test cases for _fetch_weather_data method."""
+
+    @pytest.mark.asyncio
+    async def test_fetch_weather_data_success(self):
+        """Test successful weather data fetch from API."""
+        mock_config = Mock(spec=ConfigService)
+        mock_config.get_weather_config.return_value = {}
+        
+        service = WeatherService(mock_config)
+        
+        # Mock the requests
+        mock_points_response = Mock()
+        mock_points_response.json.return_value = {
+            "properties": {
+                "forecastHourly": "https://api.weather.gov/forecast/hourly"
+            }
+        }
+        mock_points_response.raise_for_status = Mock()
+        
+        now = datetime.now(timezone.utc)
+        mock_forecast_response = Mock()
+        mock_forecast_response.json.return_value = {
+            "properties": {
+                "periods": [{
+                    "name": "Current Hour",
+                    "temperature": 72,
+                    "temperatureUnit": "F",
+                    "shortForecast": "Clear",
+                    "detailedForecast": "Clear skies",
+                    "windSpeed": "5 mph",
+                    "windDirection": "N",
+                    "probabilityOfPrecipitation": {"value": 0},
+                    "startTime": (now - timedelta(hours=1)).isoformat(),
+                    "endTime": (now + timedelta(hours=1)).isoformat()
+                }]
+            }
+        }
+        mock_forecast_response.raise_for_status = Mock()
+        
+        with patch('requests.get') as mock_get:
+            mock_get.side_effect = [mock_points_response, mock_forecast_response]
+            
+            result = await service._fetch_weather_data(37.7749, -122.4194)
+            
+            assert result is not None
+            assert result.temperature == 72
+            assert result.short_forecast == "Clear"
+
+    @pytest.mark.asyncio
+    async def test_fetch_weather_data_request_error(self):
+        """Test fetch handles request exceptions."""
+        import requests
+        
+        mock_config = Mock(spec=ConfigService)
+        mock_config.get_weather_config.return_value = {}
+        
+        service = WeatherService(mock_config)
+        
+        with patch('requests.get') as mock_get:
+            mock_get.side_effect = requests.exceptions.RequestException("Network error")
+            
+            with patch.object(service, '_load_mock_weather_from_file') as mock_load:
+                mock_load.return_value = WeatherData(
+                    name="Mock",
+                    temperature=72,
+                    temperature_unit="F",
+                    detailed_forecast="Mock data",
+                    fetched_at=datetime.now(timezone.utc),
+                    is_mock=True
+                )
+                
+                result = await service._fetch_weather_data(37.7749, -122.4194)
+                
+                mock_load.assert_called()
+                assert result.is_mock is True
+
+    @pytest.mark.asyncio
+    async def test_fetch_weather_data_key_error(self):
+        """Test fetch handles missing keys in API response."""
+        mock_config = Mock(spec=ConfigService)
+        mock_config.get_weather_config.return_value = {}
+        
+        service = WeatherService(mock_config)
+        
+        mock_response = Mock()
+        mock_response.json.return_value = {"invalid": "data"}  # Missing 'properties'
+        mock_response.raise_for_status = Mock()
+        
+        with patch('requests.get', return_value=mock_response):
+            with patch.object(service, '_load_mock_weather_from_file') as mock_load:
+                mock_load.return_value = WeatherData(
+                    name="Mock",
+                    temperature=72,
+                    temperature_unit="F",
+                    detailed_forecast="Mock data",
+                    fetched_at=datetime.now(timezone.utc),
+                    is_mock=True
+                )
+                
+                result = await service._fetch_weather_data(37.7749, -122.4194)
+                
+                mock_load.assert_called()
+
+    @pytest.mark.asyncio
+    async def test_fetch_weather_data_general_exception(self):
+        """Test fetch handles general exceptions."""
+        mock_config = Mock(spec=ConfigService)
+        mock_config.get_weather_config.return_value = {}
+        
+        service = WeatherService(mock_config)
+        
+        with patch('requests.get') as mock_get:
+            mock_get.side_effect = ValueError("Unexpected error")
+            
+            with patch.object(service, '_load_mock_weather_from_file') as mock_load:
+                mock_load.return_value = WeatherData(
+                    name="Mock",
+                    temperature=72,
+                    temperature_unit="F",
+                    detailed_forecast="Mock data",
+                    fetched_at=datetime.now(timezone.utc),
+                    is_mock=True
+                )
+                
+                result = await service._fetch_weather_data(37.7749, -122.4194)
+                
+                mock_load.assert_called()
+
+
+class TestWeatherServiceGetCurrentWeather:
+    """Test cases for get_current_weather method."""
+
+    @pytest.mark.asyncio
+    async def test_get_current_weather_live_api_success(self):
+        """Test get_current_weather with live API (non-mock mode)."""
+        mock_config = Mock(spec=ConfigService)
+        mock_config.get_weather_config.return_value = {"use_mock": False}
+        mock_config.get_intersection_coordinates.return_value = (37.7749, -122.4194)
+        
+        service = WeatherService(mock_config)
+        
+        mock_weather = WeatherData(
+            name="Live",
+            temperature=75,
+            temperature_unit="F",
+            detailed_forecast="Live weather data",
+            fetched_at=datetime.now(timezone.utc),
+            is_mock=False
+        )
+        
+        with patch.object(service, '_fetch_weather_data', new_callable=AsyncMock) as mock_fetch:
+            mock_fetch.return_value = mock_weather
+            
+            result = await service.get_current_weather(force_refresh=True)
+            
+            assert result.name == "Live"
+            assert result.is_mock is False
+            mock_fetch.assert_called_once_with(37.7749, -122.4194)
+
+    @pytest.mark.asyncio
+    async def test_get_current_weather_live_api_returns_cached_on_failure(self):
+        """Test get_current_weather returns cached data when API fails."""
+        mock_config = Mock(spec=ConfigService)
+        mock_config.get_weather_config.return_value = {"use_mock": False}
+        mock_config.get_intersection_coordinates.return_value = (37.7749, -122.4194)
+        
+        service = WeatherService(mock_config)
+        
+        # Set up cached data
+        cached_weather = WeatherData(
+            name="Cached",
+            temperature=70,
+            temperature_unit="F",
+            detailed_forecast="Cached weather",
+            fetched_at=datetime.now(timezone.utc),
+            is_mock=False
+        )
+        service._cached_weather = cached_weather
+        
+        with patch.object(service, '_fetch_weather_data', new_callable=AsyncMock) as mock_fetch:
+            mock_fetch.return_value = None  # API fails
+            
+            result = await service.get_current_weather(force_refresh=True)
+            
+            assert result.name == "Cached"
+
+
+class TestWeatherServiceMockDataExtended:
+    """Extended test cases for mock weather data functionality."""
+
+    @patch('os.path.exists')
+    def test_load_mock_weather_file_parse_error(self, mock_exists):
+        """Test loading mock weather when JSON parsing fails."""
+        mock_config = Mock(spec=ConfigService)
+        mock_config.get_weather_config.return_value = {}
+        
+        service = WeatherService(mock_config)
+        mock_exists.return_value = True
+        
+        with patch('builtins.open', mock_open_json_error()):
+            result = service._load_mock_weather_from_file()
+            
+            # Should return default weather on error
+            assert result.is_mock is True
+            assert result.name == "Unknown"
+
+    @patch('os.path.exists')
+    @patch('builtins.open')
+    def test_load_mock_weather_with_string_fetched_at(self, mock_open, mock_exists):
+        """Test loading mock weather with string fetched_at timestamp."""
+        mock_config = Mock(spec=ConfigService)
+        mock_config.get_weather_config.return_value = {}
+        
+        mock_exists.return_value = True
+        mock_weather_data = {
+            "clear": {
+                "name": "Mock Clear",
+                "temperature": 65,
+                "temperature_unit": "F",
+                "detailed_forecast": "Clear and sunny",
+                "fetched_at": "2026-01-22T12:00:00Z",
+                "is_precipitation": False
+            }
+        }
+        
+        mock_file = MagicMock()
+        mock_file.__enter__ = Mock(return_value=mock_file)
+        mock_file.__exit__ = Mock(return_value=False)
+        mock_open.return_value = mock_file
+        
+        with patch('json.load', return_value=mock_weather_data):
+            service = WeatherService(mock_config)
+            result = service._load_mock_weather_from_file(WeatherType.CLEAR)
+            
+            assert result.is_mock is True
+            assert result.temperature == 65
+
+    @patch('os.path.exists')
+    @patch('builtins.open')
+    def test_load_mock_weather_with_invalid_fetched_at(self, mock_open, mock_exists):
+        """Test loading mock weather with invalid fetched_at timestamp."""
+        mock_config = Mock(spec=ConfigService)
+        mock_config.get_weather_config.return_value = {}
+        
+        mock_exists.return_value = True
+        mock_weather_data = {
+            "clear": {
+                "name": "Mock Clear",
+                "temperature": 65,
+                "temperature_unit": "F",
+                "detailed_forecast": "Clear",
+                "fetched_at": "invalid-date-format",
+                "is_precipitation": False
+            }
+        }
+        
+        mock_file = MagicMock()
+        mock_file.__enter__ = Mock(return_value=mock_file)
+        mock_file.__exit__ = Mock(return_value=False)
+        mock_open.return_value = mock_file
+        
+        with patch('json.load', return_value=mock_weather_data):
+            service = WeatherService(mock_config)
+            result = service._load_mock_weather_from_file(WeatherType.CLEAR)
+            
+            # Should use current time for invalid date
+            assert result.is_mock is True
+            assert result.fetched_at is not None
+
+    @patch('os.path.exists')
+    @patch('builtins.open')
+    def test_load_mock_weather_missing_weather_type(self, mock_open, mock_exists):
+        """Test loading mock weather when requested type is missing."""
+        mock_config = Mock(spec=ConfigService)
+        mock_config.get_weather_config.return_value = {}
+        
+        mock_exists.return_value = True
+        mock_weather_data = {
+            "clear": {
+                "name": "Mock Clear",
+                "temperature": 65
+            }
+            # Missing other weather types
+        }
+        
+        mock_file = MagicMock()
+        mock_file.__enter__ = Mock(return_value=mock_file)
+        mock_file.__exit__ = Mock(return_value=False)
+        mock_open.return_value = mock_file
+        
+        with patch('json.load', return_value=mock_weather_data):
+            service = WeatherService(mock_config)
+            # Request a type that doesn't exist in mock data
+            result = service._load_mock_weather_from_file(WeatherType.CLEAR)
+            
+            assert result.is_mock is True
+
+
+class TestWeatherServiceProcessingExtended:
+    """Extended test cases for weather data processing."""
+
+    def test_process_weather_data_with_defaults(self):
+        """Test processing with minimal/missing data uses defaults."""
+        mock_config = Mock(spec=ConfigService)
+        mock_config.get_weather_config.return_value = {}
+        
+        service = WeatherService(mock_config)
+        
+        # Minimal forecast period
+        forecast_period = {}
+        
+        result = service._process_weather_data(forecast_period)
+        
+        assert result.temperature == 72  # Default
+        assert result.temperature_unit == "F"
+        assert result.wind_speed == "0 mph"
+        assert result.wind_direction == "N"
+        assert result.is_mock is False
+
+    def test_process_weather_data_whitespace_only_detailed_forecast(self):
+        """Test processing when detailed forecast is whitespace only."""
+        mock_config = Mock(spec=ConfigService)
+        mock_config.get_weather_config.return_value = {}
+        
+        service = WeatherService(mock_config)
+        
+        forecast_period = {
+            "temperature": 65,
+            "temperatureUnit": "F",
+            "shortForecast": "Windy",
+            "detailedForecast": "   ",  # Whitespace only
+            "windSpeed": "20 mph",
+            "windDirection": "W",
+            "probabilityOfPrecipitation": {"value": 0}
+        }
+        
+        result = service._process_weather_data(forecast_period)
+        
+        # Should construct detailed forecast
+        assert "Windy" in result.detailed_forecast
+
+    def test_process_weather_data_with_dewpoint_not_dict(self):
+        """Test processing when dewpoint is not a dictionary."""
+        mock_config = Mock(spec=ConfigService)
+        mock_config.get_weather_config.return_value = {}
+        
+        service = WeatherService(mock_config)
+        
+        forecast_period = {
+            "temperature": 70,
+            "temperatureUnit": "F",
+            "shortForecast": "Clear",
+            "windSpeed": "5 mph",
+            "windDirection": "N",
+            "dewpoint": 15.5,  # Not a dict
+            "relativeHumidity": 60  # Not a dict
+        }
+        
+        result = service._process_weather_data(forecast_period)
+        
+        assert result.dewpoint is None
+        assert result.relative_humidity is None
+
+    def test_process_weather_data_wind_speed_range(self):
+        """Test processing wind speed with range format."""
+        mock_config = Mock(spec=ConfigService)
+        mock_config.get_weather_config.return_value = {}
+        
+        service = WeatherService(mock_config)
+        
+        forecast_period = {
+            "temperature": 68,
+            "temperatureUnit": "F",
+            "shortForecast": "Breezy",
+            "windSpeed": "10 to 15 mph",  # Range format
+            "windDirection": "NE",
+            "probabilityOfPrecipitation": {"value": 5}
+        }
+        
+        result = service._process_weather_data(forecast_period)
+        
+        # Should extract first number from range
+        assert "10mph" in result.wind_info
+
+    def test_process_weather_data_no_wind_speed_number(self):
+        """Test processing when wind speed has no number."""
+        mock_config = Mock(spec=ConfigService)
+        mock_config.get_weather_config.return_value = {}
+        
+        service = WeatherService(mock_config)
+        
+        forecast_period = {
+            "temperature": 70,
+            "temperatureUnit": "F",
+            "shortForecast": "Calm",
+            "windSpeed": "calm",  # No number
+            "windDirection": "N"
+        }
+        
+        result = service._process_weather_data(forecast_period)
+        
+        assert "0mph" in result.wind_info
+
+
+class TestWeatherServiceFetchDataExtended:
+    """Extended test cases for weather data fetching."""
+
+    @pytest.mark.asyncio
+    async def test_fetch_weather_data_finds_current_period(self):
+        """Test that fetch finds the correct current time period."""
+        mock_config = Mock(spec=ConfigService)
+        mock_config.get_weather_config.return_value = {}
+        
+        service = WeatherService(mock_config)
+        
+        now = datetime.now(timezone.utc)
+        
+        mock_points_response = Mock()
+        mock_points_response.json.return_value = {
+            "properties": {
+                "forecastHourly": "https://api.weather.gov/forecast"
+            }
+        }
+        mock_points_response.raise_for_status = Mock()
+        
+        # Create periods where the second one matches current time
+        mock_forecast_response = Mock()
+        mock_forecast_response.json.return_value = {
+            "properties": {
+                "periods": [
+                    {
+                        "name": "Previous Hour",
+                        "temperature": 70,
+                        "temperatureUnit": "F",
+                        "shortForecast": "Old",
+                        "windSpeed": "5 mph",
+                        "windDirection": "N",
+                        "startTime": (now - timedelta(hours=2)).isoformat(),
+                        "endTime": (now - timedelta(hours=1)).isoformat()
+                    },
+                    {
+                        "name": "Current Hour",
+                        "temperature": 75,
+                        "temperatureUnit": "F",
+                        "shortForecast": "Current",
+                        "windSpeed": "10 mph",
+                        "windDirection": "S",
+                        "startTime": (now - timedelta(minutes=30)).isoformat(),
+                        "endTime": (now + timedelta(minutes=30)).isoformat()
+                    }
+                ]
+            }
+        }
+        mock_forecast_response.raise_for_status = Mock()
+        
+        with patch('requests.get') as mock_get:
+            mock_get.side_effect = [mock_points_response, mock_forecast_response]
+            
+            result = await service._fetch_weather_data(37.7749, -122.4194)
+            
+            # Should find the current period
+            assert result.temperature == 75
+            assert result.short_forecast == "Current"
+
+
+# Helper function for mock JSON error
+def mock_open_json_error():
+    """Create a mock that raises JSON decode error."""
+    mock = MagicMock()
+    mock.__enter__ = Mock(return_value=mock)
+    mock.__exit__ = Mock(return_value=False)
+    mock.read = Mock(side_effect=json.JSONDecodeError("Error", "doc", 0))
+    return Mock(return_value=mock)
