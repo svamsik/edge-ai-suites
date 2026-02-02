@@ -5,16 +5,6 @@ import utils as module
 
 JSONPATH = os.path.dirname(os.path.abspath(__file__)) + '/../configs/config.json'
 
-class generate_repo(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        cls.path = os.path.dirname(os.path.abspath(__file__))
-        cls.utils = module.utils()
-        time.sleep(10)
-
-    def test_generate_repo(self):
-        self.utils.generate_repo()
-
 class BaseTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
