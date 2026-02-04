@@ -1,6 +1,6 @@
 ## Smart Traffic Intersection Agent
 
-This application uses AI agent to handle a given traffic intersection by analyzing various traffic scenarios at the intersection. It provides driving suggestions, sends alerts and provides interface for other agents to plug-in and get the required information about a particular traffic intersection. Proposed deployments to happen at edge at each traffic intersection only.
+The Smart Traffic Intersection Agent application analyzes various traffic scenarios at the intersection by giving driving suggestions, sending alerts, and providing an interface for other agents to plug in and get the required information about a particular traffic intersection. These deployments only happen at the edge, at each traffic intersection.
 
 ## Documentation
 
@@ -8,7 +8,7 @@ This application uses AI agent to handle a given traffic intersection by analyzi
   - [Overview](docs/user-guide/Overview.md): A high-level introduction to the agent.
 
 - **Getting Started**
-  - [Get Started](docs/user-guide/get-started.md): Step-by-step guide to getting started with the agent.
+  - [Get Started](docs/user-guide/get-started.md): Step-by-step guide to get started with the agent.
   - [System Requirements](docs/user-guide/system-requirements.md): Hardware and software requirements for running the agent.
 
 - **Deployment**
