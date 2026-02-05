@@ -6,11 +6,10 @@ This guide provides step-by-step instructions for deploying the Industrial Edge 
 
 - [System Requirements](../system-requirements.md)
 -  K8s installation on single or multi node must be done as prerequisite to continue the following deployment. Note: The Kubernetes cluster is set up with `kubeadm`, `kubectl` and `kubelet` packages on single and multi nodes with `v1.30.2`.
-  Refer to tutorials such as <https://adamtheautomator.com/installing-kubernetes-on-ubuntu> and many other
-  online tutorials to setup kubernetes cluster on the web with host OS as Ubuntu 22.04.
-- For Helm installation, refer to [helm website](https://helm.sh/docs/intro/install/)
+  Refer to online tutorials (such as <https://adamtheautomator.com/install-kubernetes-ubuntu>) to setup Kubernetes cluster on the web with host OS as Ubuntu 22.04.
+- For Helm installation, refer to [Helm website](https://helm.sh/docs/intro/install/)
 
-> **Note**
+> **Note:**
 > If Ubuntu Desktop is not installed on the target system, follow the instructions from Ubuntu to [install Ubuntu desktop](https://ubuntu.com/tutorials/install-ubuntu-desktop). The target system refers to the system where you are installing the application.
 
 ## Step 1: Generate or download the Helm charts
@@ -28,16 +27,17 @@ hide_directive-->
 
 1. Download Helm chart:
    ```bash
-   helm pull oci://registry-1.docker.io/intel/wind-turbine-anomaly-detection-sample-app --version 1.1.0-weekly
-   ```
+   helm pull oci://registry-1.docker.io/intel/wind-turbine-anomaly-detection-sample-app --version 2026.0.0-<date>-weekly
+    ```
+
+    Replace `<date>` with the actual patch version date (e.g., `20260120` for January 20th, 2026).
+    `helm pull oci://registry-1.docker.io/intel/wind-turbine-anomaly-detection-sample-app --version 2026.0.0-20260120-weekly`
 
 2. Extract the Helm chart:
    ```bash
-   tar -xvzf wind-turbine-anomaly-detection-sample-app-1.1.0-weekly.tgz
+   tar -xvzf wind-turbine-anomaly-detection-sample-app-2026.0.0-<date>-weekly.tgz
    cd wind-turbine-anomaly-detection-sample-app
    ```
-
-    `helm pull oci://registry-1.docker.io/intel/wind-turbine-anomaly-detection-sample-app --version 1.1.0-weekly`
 
 **Option B: Generate Helm charts**
 
@@ -48,7 +48,7 @@ hide_directive-->
 
 2. Generate the charts:
    ```bash
-   make gen_helm_charts app=wind-turbine-anomaly-detection version=1.1.0-weekly
+   make gen_helm_charts app=wind-turbine-anomaly-detection
    cd helm/
    ```
 
@@ -65,12 +65,15 @@ hide_directive-->
 
 1. Download Helm chart:
    ```bash
-   helm pull oci://registry-1.docker.io/intel/weld-anomaly-detection-sample-app --version 1.0.0-weekly
-   ```
+   helm pull oci://registry-1.docker.io/intel/weld-anomaly-detection-sample-app --version 2026.0.0-<date>-weekly
+     ```
+
+    Replace `<date>` with the actual patch version date (e.g., `20260120` for January 20th, 2026).
+    `helm pull oci://registry-1.docker.io/intel/weld-anomaly-detection-sample-app --version 2026.0.0-20260120-weekly`
 
 2. Extract the Helm chart:
    ```bash
-   tar -xvzf weld-anomaly-detection-sample-app-1.0.0-weekly.tgz
+   tar -xvzf weld-anomaly-detection-sample-app-2026.0.0-<date>-weekly.tgz
    cd weld-anomaly-detection-sample-app
    ```
 
@@ -85,7 +88,7 @@ hide_directive-->
 
 2. Generate the charts:
     ```bash
-    make gen_helm_charts app=weld-anomaly-detection version=1.0.0-weekly
+    make gen_helm_charts app=weld-anomaly-detection
     cd helm/
     ```
 
@@ -98,7 +101,7 @@ hide_directive-->
 
 ## Step 2: Configure and update the environment variables
 
-1. Update the following fields in `values.yaml` file of the helm chart
+1. Update the following fields in `values.yaml` file of the Helm chart
 
     ``` sh
     INFLUXDB_USERNAME:
@@ -166,7 +169,7 @@ helm install ts-weld-anomaly . -n ts-sample-app --create-namespace
 ::::
 hide_directive-->
 
-## Step 4: Copy the udf package for helm deployment to Time Series Analytics Microservice
+## Step 4: Copy the UDF package for Helm deployment to Time Series Analytics Microservice
 
 <!--hide_directive
 ::::{tab-set}
@@ -179,16 +182,16 @@ To copy your own or existing model into Time Series Analytics Microservice in or
 
 1. The following udf package is placed in the repository under `edge-ai-suites/manufacturing-ai-suite/industrial-edge-insights-time-series/apps/wind-turbine-anomaly-detection/time-series-analytics-config`.
 
-    ```
-    - time-series-analytics-config/
-        - models/
-            - windturbine_anomaly_detector.pkl
-        - tick_scripts/
-            - windturbine_anomaly_detector.tick
-        - udfs/
-            - requirements.txt
-            - windturbine_anomaly_detector.py
-    ```
+    >
+    > - time-series-analytics-config/
+    >     - models/
+    >         - windturbine_anomaly_detector.pkl
+    >     - tick_scripts/
+    >         - windturbine_anomaly_detector.tick
+    >     - udfs/
+    >         - requirements.txt
+    >         - windturbine_anomaly_detector.py
+    >
 
 2. Copy your new UDF package (using the wind turbine anomaly detection UDF package as an example) to the `time-series-analytics-microservice` pod:
     ```sh
@@ -214,16 +217,16 @@ To copy your own or existing model into Time Series Analytics Microservice in or
 
 1. The following udf package is placed in the repository under `edge-ai-suites/manufacturing-ai-suite/industrial-edge-insights-time-series/apps/weld-anomaly-detection/time-series-analytics-config`.
 
-    ```
-    - time-series-analytics-config/
-        - models/
-            - weld_anomaly_detector.cb
-        - tick_scripts/
-            - weld_anomaly_detector.tick
-        - udfs/
-            - requirements.txt
-            - weld_anomaly_detector.py
-    ```
+    >
+    > - time-series-analytics-config/
+    >     - models/
+    >         - weld_anomaly_detector.cb
+    >     - tick_scripts/
+    >         - weld_anomaly_detector.tick
+    >     - udfs/
+    >         - requirements.txt
+    >         - weld_anomaly_detector.py
+    >
 
 2. Copy your new UDF package (using the weld anomaly detection UDF package as an example) to the `time-series-analytics-microservice` pod:
 
