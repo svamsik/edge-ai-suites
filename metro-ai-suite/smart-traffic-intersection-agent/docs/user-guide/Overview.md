@@ -1,10 +1,10 @@
-# Scene Intelligence microservice
+# How It Works
 
-The Scene Intelligence microservice is a comprehensive traffic analysis service that provides real-time intersection monitoring, directional traffic density analysis, and Vision Language Model (VLM) powered traffic insights. It processes MQTT traffic data, manages camera images, and delivers intelligent traffic analysis through RESTful APIs.
+## Scene Intelligence Microservice
 
-## Overview
+The Smart Traffic Intersection agent uses the Scene Intelligence microservice that monitors traffic intersection at real time. The Scene Intelligence microservice processes real-time traffic data from Message Queuing Telemetry Transport (MQTT) streams and provides advanced analytics on, but not limited to, directional traffic density, Vision Language Model (VLM)-powered traffic scene, and traffic.
 
-The microservice processes real-time traffic data from MQTT streams and provides advanced analytics including directional traffic density monitoring, VLM-powered traffic scene analysis, and comprehensive traffic summaries. It supports sliding window analysis, sustained traffic detection, and intelligent camera image management for enhanced traffic insights.
+The microservice supports sliding-window analysis, sustained traffic detection, and intelligent management of camera images to enhance traffic insights.
 
 <p align="center">
     <img src="./_images/ITT_architecture.png" alt="Architecture" />
