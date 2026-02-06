@@ -1,15 +1,11 @@
 # How It Works
 
-## Smart Traffic Intersection Agent
-
 The Smart Traffic Intersection Agent is a comprehensive traffic analysis service that provides real-time intersection monitoring, directional traffic density analysis, and Vision Language Model (VLM) powered traffic insights. 
 It processes MQTT traffic data, manages camera images, and delivers intelligent traffic analysis through RESTful APIs.
 
 The agent supports sliding-window analysis, sustained traffic detection, and intelligent management of camera images to enhance traffic insights.
 
-## How It Works
-
-The diagram below illustrates the high-level architecture of the Smart Traffic Intelligence Agent, showcasing its core components and their interactions with external systems.
+The following figure shows the high-level architecture of the Smart Traffic Intelligence Agent, showcasing its core components and their interactions with external systems.
 
 <p align="center">
     <img src="./_images/ITT_architecture.png" alt="Architecture" />
@@ -23,15 +19,15 @@ The Smart Traffic UI below shows how traffic, weather data is analyzed and summa
 
 ## Components
 
-The Smart Traffic Intelligence stack includes these containerized services:
+The Smart Traffic Intelligence stack includes the following containerized services:
 
-- **MQTT Broker** (Eclipse Mosquitto) - Message broker for traffic data
+- **MQTT Broker** (Eclipse Mosquitto message broker) - Message broker for traffic data
 - **DL Streamer Pipeline Server** - Video analytics and AI inference
 - **SceneScape Database** - Configuration and metadata storage
 - **SceneScape Web Server** - Management interface
 - **SceneScape Controller** - Orchestration service
 - **VLM OpenVINO Serving** - Vision Language Model inference
-- **Traffic Intelligence** - Real-time traffic analysis with dual interface (API + UI)
+- **Traffic Intelligence** - Real-time traffic analysis with dual interface (API and UI)
 
 ### Key Integration Points
 
@@ -42,7 +38,7 @@ The Smart Traffic Intelligence stack includes these containerized services:
 - **Health Monitoring**: All services include health check endpoints
 
 
-## Supporting Resources
+## Learn More
 
 - [Get Started Guide](get-started.md)
 - [API Reference](api-reference.md)
