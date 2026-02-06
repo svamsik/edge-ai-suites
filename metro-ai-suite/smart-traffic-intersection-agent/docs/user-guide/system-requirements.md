@@ -1,8 +1,8 @@
 # System Requirements
 
-This section shows the hardware, software, and platform requirements to help you set up and run the microservice efficiently.
+This section shows the hardware, software, and platform requirements to help you set up and run Smart Traffic Intersection Agent efficiently.
 
-This microservice currently supports CPU- and GPU-based runs. This microservice runs in the context of video summary pipeline. Hence, the system requirements is as per the documentation in the sample application. 
+The agent currently supports CPU- and GPU-based runs, and runs in the context of video summary pipeline. Hence, the system requirements is as per the documentation in the sample application. 
 
 ## Supported Operating Systems
 
