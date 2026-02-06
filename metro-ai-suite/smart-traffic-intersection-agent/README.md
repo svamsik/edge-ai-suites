@@ -7,7 +7,7 @@ The Smart Traffic Intersection Agent application analyzes various traffic scenar
   - [System Requirements](docs/user-guide/system-requirements.md): Hardware and software requirements for running the agent.
 
 ## How It Works
-  - [Overview](docs/user-guide/overview.md): A high-level introduction to the agent.
+  - [Overview](docs/user-guide/index.md): A high-level introduction to the agent.
   - [How It Works](docs/user-guide/how-it-works.md): Instructions for building the agent from source code.
  
 ## Learn More
