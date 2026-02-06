@@ -1,4 +1,4 @@
-# How It Works
+# Overview
 
 The Smart Traffic Intersection Agent is a comprehensive traffic analysis service that provides real-time intersection monitoring, directional traffic density analysis, and Vision Language Model (VLM) powered traffic insights. 
 It processes MQTT traffic data, manages camera images, and delivers intelligent traffic analysis through RESTful APIs.
