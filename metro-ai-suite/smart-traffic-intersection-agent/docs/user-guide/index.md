@@ -5,7 +5,7 @@ It processes MQTT traffic data, manages camera images, and delivers intelligent 
 
 The agent supports sliding-window analysis, sustained traffic detection, and intelligent management of camera images to enhance traffic insights.
 
-The following figure shows the high-level architecture of the Smart Traffic Intelligence Agent, showcasing its core components and their interactions with external systems.
+The following figure shows the high-level architecture of the Smart Traffic Intersection Agent, showcasing its core components and their interactions with external systems.
 
 <p align="center">
     <img src="./_images/ITT_architecture.png" alt="Architecture" />
@@ -19,7 +19,7 @@ The Smart Traffic UI below shows how traffic, weather data is analyzed and summa
 
 ## Components
 
-The Smart Traffic Intelligence stack includes the following containerized services:
+The Smart Traffic Intersection stack includes the following containerized services:
 
 - **MQTT Broker** (Eclipse Mosquitto message broker) - Message broker for traffic data
 - **DL Streamer Pipeline Server** - Video analytics and AI inference
