@@ -1,10 +1,10 @@
-## PTP Time Synchronization (IEEE 802.1AS)
+# PTP Time Synchronization (IEEE 802.1AS)
 
-### What is PTP?
+## What is PTP?
 
 Precision Time Protocol (PTP) provides sub-microsecond time synchronization across Ethernet devices, enabling accurate latency measurements.
 
-### Install PTP Tools
+## Install PTP Tools
 
 ```bash
 sudo apt-get update
@@ -13,7 +13,7 @@ git clone https://git.code.sf.net/p/linuxptp/code linuxptp
 cd linuxptp
 ```
 
-### PTP Commands
+## PTP Commands
 
 The TSN switch is configured to act as the PTP Grandmaster clock. On each Arrow Lake machine, execute the following command to synchronize the system clock using PTP.
 
