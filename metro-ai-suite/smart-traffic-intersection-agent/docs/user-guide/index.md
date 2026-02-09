@@ -1,4 +1,4 @@
-# Overview
+# Smart Traffic Intersection Agent
 
 The Smart Traffic Intersection Agent is a comprehensive traffic analysis service that provides real-time intersection monitoring, directional traffic density analysis, and Vision Language Model (VLM) powered traffic insights. 
 It processes MQTT traffic data, manages camera images, and delivers intelligent traffic analysis through RESTful APIs.
@@ -8,13 +8,13 @@ The agent supports sliding-window analysis, sustained traffic detection, and int
 The following figure shows the high-level architecture of the Smart Traffic Intersection Agent, showcasing its core components and their interactions with external systems.
 
 <p align="center">
-    <img src="./_images/ITT_architecture.png" alt="Architecture" />
+    <img src="./_assets/ITT_architecture.png" alt="Architecture" />
 </p>
 
 The Smart Traffic UI below shows how traffic, weather data is analyzed and summary, alerts are shown to the user.
 
 <p align="center">
-    <img src="./_images/traffic_agent_ui.png" alt="Traffic Intersection Agent UI" />
+    <img src="./_assets/traffic_agent_ui.png" alt="Traffic Intersection Agent UI" />
 </p>
 
 ## Components
@@ -43,3 +43,17 @@ The Smart Traffic Intersection stack includes the following containerized servic
 - [Get Started Guide](get-started.md)
 - [API Reference](api-reference.md)
 - [System Requirements](system-requirements.md)
+
+
+<!--hide_directive
+:::{toctree}
+:hidden:
+
+get-started
+system-requirements
+build-from-source
+api-reference
+release-notes
+
+:::
+hide_directive-->
