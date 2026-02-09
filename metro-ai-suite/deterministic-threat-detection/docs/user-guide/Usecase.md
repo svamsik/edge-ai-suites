@@ -1,4 +1,4 @@
-## Use case
+# Use case
 
 This use case demonstrates how Time-Sensitive Networking (TSN) enables deterministic and reliable delivery of AI-processed video and sensor data in a shared Ethernet network carrying mixed traffic.
 
