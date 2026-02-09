@@ -1,4 +1,4 @@
-## MOXA default configuration
+# MOXA Default Configuration
 
 Following the guide [how-to-configure-moxa-switch.md](./how-to-configure-moxa-switch.md), set the MOXA switch to its default configuration before proceeding with VLAN configuration.
 
