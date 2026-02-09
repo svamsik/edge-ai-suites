@@ -1,5 +1,3 @@
-## Overview
-
 This document describes a **Time-Sensitive Networking (TSN)** sample application designed to demonstrate deterministic, low-latency delivery of **AI-processed video and sensor data** in the presence of best-effort background traffic.
 
 The sample showcases:
