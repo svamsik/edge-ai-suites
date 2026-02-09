@@ -1,4 +1,4 @@
-# How It Works
+# Build from Source
 
 This section shows how to build the Smart Route Planning Agent from source to customize, debug, or extend its functionality, for developers who want to work directly with the source code.
 
