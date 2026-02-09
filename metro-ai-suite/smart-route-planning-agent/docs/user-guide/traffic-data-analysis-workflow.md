@@ -1,10 +1,6 @@
 # Traffic Data Analysis Workflow
 
-## Overview
-
-The Scene Intelligence microservice employs a sophisticated multi-stage traffic analysis pipeline that combines real-time directional traffic monitoring with AI-powered Vision Language Model (VLM) analysis. This document explains the complete workflow, configuration parameters, and data retention policies.
-
-## Table of Contents
+The Smart Route Planning Agent employs a multi-stage traffic analysis pipeline that combines real-time directional traffic monitoring with AI-powered Vision Language Model (VLM) analysis. This section shows the complete workflow, configuration parameters, and data retention policies.
 
 - [Traffic Analysis Pipeline](#traffic-analysis-pipeline)
 - [VLM Integration and Triggers](#vlm-integration-and-triggers)
@@ -55,9 +51,9 @@ The VLM system analyzes high-density traffic situations using a multi-gated appr
 
 ## VLM Integration and Triggers
 
-### Trigger Conditions (ALL must be true)
+The following are the trigger conditions, in which all must be true:
 
-#### 1. **Threshold Gate**: Traffic Density Exceeds Threshold
+1. **Threshold Gate**: traffic density exceeds the threshold:
 
 ```python
 # Configurable via environment or config file
@@ -77,7 +73,7 @@ directional_densities = {
 - **Environment**: `HIGH_DENSITY_THRESHOLD=5.0`
 - **Config File**: `config/vlm_config.json` → `traffic_analysis.high_density_threshold`
 
-#### 2. **State Change Gate**: Normal → High Traffic Transition
+2. **State Change Gate**: normal to high-traffic transition:
 
 ```python
 # Only triggers on state transitions, not continuous high traffic
@@ -86,9 +82,9 @@ if previous_state == NORMAL and current_state == HIGH:
     # Continue to next gate
 ```
 
-**Purpose**: Prevents continuous VLM calls during sustained high traffic periods.
+**Purpose**: Prevents continuous VLM calls during sustained high-traffic periods.
 
-#### 3. **Persistence Gate**: Sustained High Traffic Duration
+3. **Persistence Gate**: sustained high-traffic duration:
 
 ```python
 # Traffic must remain high for minimum duration
@@ -104,7 +100,7 @@ if time_in_high_state >= minimum_duration:
 - **Environment**: `MINIMUM_DURATION_FOR_CONSISTENTLY_HIGH_TRAFFIC_SECONDS=30`
 - **Config File**: `traffic_analysis.minimum_duration_for_consistently_high_traffic_seconds`
 
-#### 4. **Cooldown Gate**: Time Since Last Analysis
+4. **Cooldown Gate**: time since the last analysis:
 
 ```python
 # Prevent frequent VLM calls for same intersection
@@ -120,7 +116,7 @@ if time_since_last >= cooldown_minutes * 60:
 - **Environment**: `VLM_COOLDOWN_MINUTES=1`
 - **Config File**: `traffic_analysis.vlm_cooldown_minutes`
 
-#### 5. **Concurrency Gate**: No Pending Analysis
+5. **Concurrency Gate**: no pending analysis:
 
 ```python
 # Prevent duplicate requests for same intersection
@@ -159,7 +155,7 @@ Release Semaphore Slot
 
 ### Implementation Details
 
-**Purpose**: Solve timing issues where traffic changes before VLM completes, making analysis invisible to users.
+**Purpose**: Solve timing issues where traffic changes before the VLM completes, making analysis invisible to users.
 
 #### 1. **Sliding Window Configuration**
 
@@ -185,10 +181,10 @@ traffic_window: List[TrafficWindow] = []
 
 **Process**:
 
-1. Every traffic update adds entry to window
+1. Every traffic update adds an entry to the window
 2. Remove entries older than 15 seconds
 3. Analyze window for sustained periods ≥ 3 seconds
-4. Trigger VLM with traffic context from sustained period
+4. Trigger VLM with traffic context from a sustained period
 
 #### 3. **Sustained Traffic Detection**
 
@@ -245,8 +241,8 @@ Scene Intelligence Service           VLM Microservice (4 Workers)
 
 **Benefits**:
 
-- Up to 4 intersections analyzed simultaneously
-- Each intersection has independent state tracking
+- Up to 4 intersections are analyzed simultaneously
+- Each intersection has an independent state tracking
 - Optimal VLM microservice utilization
 - No blocking between intersections
 
@@ -341,9 +337,9 @@ OV_CONFIG={"PERFORMANCE_HINT": "LATENCY"}             # OpenVINO optimization
 
 **Features**:
 
-- Environment variable substitution using `${VAR_NAME}` syntax
-- Fallback values when environment variables not set
-- JSON validation on service startup
+- Enable environment variable substitution using the `${VAR_NAME}` syntax
+- Enable fallback values when environment variables are not set
+- Enable JSON validation on service startup
 
 ### Hardcoded Values (Priority: Low)
 
@@ -375,9 +371,9 @@ max_age_hours = 2                        # Default cleanup threshold
 
 #### Storage Duration
 
-- **In-Memory**: Stored indefinitely until service restart
+- **In-Memory**: Stored indefinitely until the service restarts
 - **API Visibility**: 20 minutes after analysis completion
-- **Cleanup**: Manual via `clear_old_analyses()` method (2-hour default, never called automatically)
+- **Cleanup**: Manual via the `clear_old_analyses()` method (2-hour default, never called automatically)
 
 #### Overwrite Behavior
 
@@ -412,9 +408,9 @@ class VLMAnalysisResult:
 #### Storage Logic
 
 1. **VLM Analysis**: Images stored with analysis results
-2. **Same Retention**: Images persist as long as VLM analysis exists
+2. **Same Retention**: Images persist as long as the VLM analysis exists
 3. **API Priority**: Serve VLM-stored images first, then fresh images
-4. **Overwrite**: Images replaced when new VLM analysis generated
+4. **Overwrite**: Images are replaced when a new VLM analysis is generated
 
 #### Storage Format
 
@@ -450,15 +446,15 @@ class IntersectionTrafficState:
 
 #### Persistence
 
-- **Lifetime**: Exists until service restart
-- **Reset**: Only when service restarted or intersection removed
+- **Lifetime**: Exists until the service restarts
+- **Reset**: Only when the service restarted or the intersection removed
 - **Updates**: Real-time via MQTT traffic data
 
 ## API Integration
 
 ### Response Enhancement
 
-All traffic endpoints include VLM analysis when available:
+All traffic endpoints will include a VLM analysis when there is enough information for the VLM:
 
 ```json
 {
@@ -503,7 +499,7 @@ All traffic endpoints include VLM analysis when available:
 
 ## Troubleshooting
 
-### VLM Analysis Not Triggering
+### VLM Analysis is Not Triggered
 
 Check each gate condition:
 
@@ -570,13 +566,13 @@ docker logs scene-intelligence | grep "VLM analysis completed"
 
 ## Summary
 
-The Scene Intelligence traffic analysis system provides:
+The Smart Route Planning Agent provides:
 
 - **Real-time directional traffic monitoring** with configurable thresholds
-- **AI-powered traffic analysis** using Vision Language Models for high-density situations
+- **AI-powered traffic analysis** using VLMs for high-density situations
 - **Windowed analysis** to solve timing issues and provide traffic context
-- **Concurrent processing** supporting multiple simultaneous VLM analyses
-- **Flexible configuration** via environment variables and config files
+- **Concurrent processing** supports multiple simultaneous VLM analyses
+- **Flexible configuration** via environment variables and configuration files
 - **Image retention** tied to VLM analysis lifecycle
 - **Comprehensive API integration** with enhanced traffic context
 

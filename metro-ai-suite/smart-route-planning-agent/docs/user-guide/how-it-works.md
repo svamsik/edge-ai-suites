@@ -1,25 +1,23 @@
-# How to Build from Source
+# How It Works
 
-Build the **Scene Intelligence microservice** from source to customize, debug, or extend its functionality. In this guide, you will:
+This section shows how to build the Smart Route Planning Agent from source to customize, debug, or extend its functionality, for developers who want to work directly with the source code.
+
+You will do the following:
 - Set up your development environment.
 - Compile the source code and resolve dependencies.
 - Generate a runnable build for local testing or deployment.
 
-This guide is ideal for developers who want to work directly with the source code.
-
 ## Prerequisites
 
-Before you begin, ensure the following:
-- **System Requirements**: Verify your system meets the [minimum requirements](./system-requirements.md).
-- This guide assumes basic familiarity with Git commands, Python virtual environments, and terminal usage. If you are new to these concepts, see:
+- **System Requirements**: Verify that your system meets the [minimum requirements](./system-requirements.md).
+
+- Basic familiarity with Git commands, Python virtual environments, and using the terminal. If you are new to these concepts, see:
   - [Git Documentation](https://git-scm.com/doc)
   - [Python Virtual Environments](https://docs.python.org/3/tutorial/venv.html)
 
-## Steps to Build
+## Build Smart Route Planning Agent
 
-This section provides a detailed note on how to build the Scene Intelligence microservice.
-
-**_(Optional)_** Docker Compose builds the _Scene Intelligence_ with a default image and tag name. If you want to use a different image and tag, export these variables:
+**(Optional)** Docker Compose tool builds the Smart Route Planning Agent with a default image and tag name. If you want to use a different image and tag, export these variables:
 
 ```bash
 export REGISTRY_URL="your-container-registry_url"
@@ -27,33 +25,31 @@ export PROJECT_NAME="your-project-name"
 export TAG="your_tag"
 ```
 
-> **_NOTE:_** `PROJECT_NAME` will be suffixed to `REGISTRY_URL` to create a namespaced url. Final image name will be created/pulled by further suffixing the application name and tag with the namespaced url. 
+> **Note:** `PROJECT_NAME` will be suffixed to `REGISTRY_URL` to create a namespaced URL. The final image name will be created by suffixing the application name and tag with the namespaced URL. 
 
-> **_EXAMPLE:_** If variables are set using above command, the final image names for _Scene Intelligence_ would be `<your-container-registry-url>/<your-project-name>/scene-intelligence:<your-tag>`. 
+> **Example:** If variables are set using above command, the final image name for Smart Route Planning Agent will be `<your-container-registry-url>/<your-project-name>/scene-intelligence:<your-tag>`. 
 
-If variables are not set, in that case, the `TAG` will have default value as _latest_. Hence, final image will be `scene-intelligence:latest`.
+If variables are not set, the `TAG` will have the default value, which is `latest`. Hence, the final image name will be `scene-intelligence:latest`.
 
-### 1. Clone the Repository
+1. Clone the repository:
 
 ```bash
 git clone https://github.com/open-edge-platform/edge-ai-libraries.git edge-ai-libraries
 cd edge-ai-libraries/microservices/scene-intelligence
 ```
 
-### 2. Set up environment values
+2. Set up environment values:
 
-Follow all the instructions provided in the [get started](./get-started.md#set-environment-values) document to set up the environment variables.
+Follow the instructions in the [Get Started](./get-started.md#set-environment-values) section to set up the environment variables.
 
-### 3. Build the Docker image
-
-To build the Docker image, run the following command:
+3. Build the Docker image:
 
 ```bash
 cd docker
 docker compose -f docker/compose.yaml build scene-intelligence
 ```
 
-### 4. Run the Docker image
+4. Run the Docker image:
 
 ```bash
 docker compose -f docker/compose.yaml up scene-intelligence
@@ -61,33 +57,31 @@ docker compose -f docker/compose.yaml up scene-intelligence
 
 ## Development Setup
 
-For local development without Docker:
+For local development without Docker platform:
 
-### 1. Set up Python Environment
+1. Set up Python Environment:
 
 ```bash
 # Create virtual environment
 python3 -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+source venv/bin/activate  # On Windows OS: venv\Scripts\activate
 
-# Or using Poetry (recommended)
+# Or, Intel recommends setting up using the Poetry tool
 poetry install
 poetry shell
 ```
 
-### 2. Install Dependencies
+2. Install dependencies:
 
 ```bash
 # Using pip
 pip install -r requirements.txt
 
-# Using Poetry (recommended)
+# Or, Intel recommends setting up using the Poetry tool
 poetry install
 ```
 
-### 3. Set up Configuration Files
-
-Create the required configuration files:
+3. Set up configuration files:
 
 ```bash
 mkdir -p config
@@ -97,7 +91,7 @@ cp config/vlm_config.json.example config/vlm_config.json
 
 Edit the configuration files according to your environment.
 
-### 4. Set Environment Variables
+4. Set environment variables:
 
 ```bash
 export SCENE_INTELLIGENCE_CONFIG_PATH="./config/scene_intelligence_config.json"
@@ -106,19 +100,19 @@ export MQTT_BROKER_HOST="localhost"
 export MQTT_BROKER_PORT=1883
 ```
 
-### 5. Run the Service
+5. Run the service:
 
 ```bash
-# Using Poetry
+# Using the Poetry tool
 poetry run python -m src.scene_intelligence.main
 
 # Using pip
 python -m src.scene_intelligence.main
 ```
 
-## Testing the Build
+## Test the build
 
-### 1. Run Unit Tests
+1. Run unit tests:
 
 ```bash
 # Using Poetry
@@ -128,7 +122,7 @@ poetry run pytest tests/
 python -m pytest tests/
 ```
 
-### 2. Run Integration Tests
+2. Run integration tests:
 
 ```bash
 # Start required services (MQTT broker, VLM service)
@@ -141,7 +135,7 @@ poetry run pytest tests/integration/
 docker compose -f docker/compose.yaml down
 ```
 
-### 3. Verify API Endpoints
+3. Verify API endpoints:
 
 ```bash
 # Health check
@@ -162,7 +156,7 @@ curl "http://localhost:8001/api/v1/traffic/directional/intersection/3d7b9e1f-c4a
 
 ## Development Workflow
 
-### 1. Code Quality
+1. Run the following to ensure code quality:
 
 ```bash
 # Format code
@@ -177,7 +171,7 @@ poetry run pylint src/
 poetry run mypy src/
 ```
 
-### 2. Pre-commit Hooks
+2. Run pre-commit hooks:
 
 ```bash
 # Install pre-commit
@@ -190,7 +184,7 @@ poetry run pre-commit install
 poetry run pre-commit run --all-files
 ```
 
-### 3. Documentation
+3. Generate API documentation:
 
 ```bash
 # Generate API documentation
@@ -202,30 +196,30 @@ cd docs/_build/html && python -m http.server 8080
 
 ## Deployment
 
-### 1. Production Build
+1. Build for production:
 
 ```bash
 # Build optimized Docker image
 docker build -t scene-intelligence:production -f docker/Dockerfile.prod .
 
-# Or using Docker Compose with production overrides
+# Or using Docker Compose tool with production overrides
 docker compose -f docker/compose.yaml -f docker compose -f docker/compose.yaml.yml -f docker compose -f docker/compose.yaml.prod.yml build
 ```
 
-### 2. Multi-architecture Build
+2. Build for multiple architectures:
 
 ```bash
 # Build for multiple architectures
 docker buildx build --platform linux/amd64,linux/arm64 -t scene-intelligence:latest .
 ```
 
-### 3. Kubernetes Deployment
+3. Deploy on a Kubernetes Cluster
 
 ```bash
 # Generate Kubernetes manifests
 helm template scene-intelligence helm/scene-intelligence > k8s-manifests.yaml
 
-# Deploy to Kubernetes
+# Deploy on a Kubernetes cluster
 kubectl apply -f k8s-manifests.yaml
 ```
 
@@ -233,24 +227,24 @@ kubectl apply -f k8s-manifests.yaml
 
 ### Common Issues
 
-**Dependencies not installing**:
-- Ensure Python 3.10+ is installed
+**Dependencies are not installed**:
+- Ensure Python programming version 3.10+ is installed
 - Update pip: `pip install --upgrade pip`
-- Clear Poetry cache: `poetry cache clear pypi --all`
+- Clear the Poetry cache: `poetry cache clear pypi --all`
 
 **Import errors**:
 - Verify PYTHONPATH includes the src directory
-- Check virtual environment is activated
+- Check that virtual environment is activated
 - Ensure all dependencies are installed
 
 **Configuration errors**:
 - Validate JSON configuration files
 - Check file paths in environment variables
-- Verify all required configuration sections are present
+- Verify that all required configuration sections are present
 
-**Service not starting**:
+**Service does not start**:
 - Check port availability
-- Verify MQTT broker connectivity
+- Verify Message Queuing Telemetry Transport (MQTT) broker connectivity
 - Review service logs for detailed error messages
 
 ### Debug Mode
@@ -262,7 +256,7 @@ export LOG_LEVEL=DEBUG
 poetry run python -m src.scene_intelligence.main
 ```
 
-## Supporting Resources
+## Learn More
 
 * [Get Started Guide](get-started.md)
 * [Environment Variables](environment-variables.md)
