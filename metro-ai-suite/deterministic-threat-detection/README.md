@@ -22,4 +22,4 @@ An aggregation node measures the end-to-end latency. By injecting background tra
 
 ## Getting Started
 
-For detailed instructions on how to set up the environment and run the demonstration, please refer to the user guide in the `docs/user-guide` directory. Start with [Overview.md](./docs/user-guide/Overview.md).
+For detailed instructions on how to set up the environment and run the demonstration, please refer to the user guide in the `docs/user-guide` directory. Start with [index.md](./docs/user-guide/index.md).
