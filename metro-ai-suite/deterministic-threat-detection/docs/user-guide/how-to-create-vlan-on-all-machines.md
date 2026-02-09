@@ -1,4 +1,4 @@
-## Create VLAN on All Machines
+# Create VLAN on All Machines
 
 To create VLAN interfaces on all Arrow Lake machines, execute the following commands on each machine. This example creates VLANs with IDs 1, 3, and 5, which correspond to the VLAN configuration on the MOXA TSN switch.
 
