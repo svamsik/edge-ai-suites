@@ -17,6 +17,8 @@ services:
     image: ${DLSTREAMER_PIPELINE_SERVER_IMAGE}
     container_name: dlstreamer-pipeline-server
     environment:
+      - GST_DEBUG="GST_TRACER:7"
+      - GST_TRACERS="latency_tracer(flags=pipeline)" 
       - http_proxy=${http_proxy}
       - https_proxy=${https_proxy}
       - no_proxy=${no_proxy},${HOST_IP},mediamtx-server,otel-collector
