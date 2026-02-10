@@ -1,4 +1,8 @@
-# Use case
+# Getting Started
+
+This guide provides a streamlined path to setting up and running the Deterministic Threat Detection demonstration. It covers the essential prerequisites and the main steps to see the system in action.
+
+# Use Case
 
 This use case demonstrates how Time-Sensitive Networking (TSN) enables deterministic and reliable delivery of AI-processed video and sensor data in a shared Ethernet network carrying mixed traffic.
 
@@ -112,3 +116,22 @@ All machines are connected to the MOXA switch and synchronized using PTP.
    For detailed instructions on enabling TSN traffic shaping, refer to the [TSN Traffic Shaping Guide](./how-to-enable-tsn-traffic-shaping.md).
 
 8. **Analyze Results and Visualize Latency**: Observe the latency graphs on the MQTT Aggregator dashboard. With TSN enabled, the latency for critical traffic should remain low and deterministic, even with the `iperf` traffic running.
+
+<!--hide_directive
+:::{toctree}
+:hidden:
+
+get-started
+how-to-configure-moxa-switch‎
+how-to-configure-ptp
+how-to-configure-vlan-on-moxa-switch
+how-to-configure-vlan-on-all-machines
+how-to-enable-tsn-traffic-shaping
+how-it-run-mqtt-aggregator-and-visualization
+how-to-run-rtsp-camera-and-ai-inference
+how-to-run-sensor-data-producer‎
+how-to-run-traffic-injector‎
+‎
+Source Code < https://github.com/open-edge-platform/edge-ai-suites/blob/main/metro-ai-suite/deterministic threat detection/docs/user-guide>
+:::
+hide_directive-->
