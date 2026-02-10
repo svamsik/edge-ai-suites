@@ -1,3 +1,15 @@
+"""
+MQTT Data Aggregator and Real-Time Latency Visualizer.
+
+This script connects to multiple MQTT brokers, subscribes to specified topics,
+and calculates the end-to-end latency of messages based on PTP timestamps.
+It then visualizes these latencies in a real-time web-based dashboard using Dash.
+
+The script is designed to monitor the performance of a Time-Sensitive Networking (TSN)
+setup by displaying how network conditions affect data delivery for different
+streams (e.g., from cameras and sensors).
+"""
+
 # 
 # Copyright (C) 2026 Intel Corporation. 
 # 
@@ -42,7 +54,9 @@ last_update_times = {}
 
 # --- Argument Parsing ---
 def parse_arguments():
-    parser = argparse.ArgumentParser(description="Multi-Broker MQTT Data Aggregator and Visualizer")
+    """Parse command-line arguments for the aggregator and visualizer."""
+    parser = argparse.ArgumentParser(
+        description="Multi-Broker MQTT Data Aggregator and Visualizer")
     parser.add_argument("--topic-brokers", nargs='+', default=DEFAULT_TOPICS_BROKERS,
                         help="List of 'topic:broker_ip_address' pairs (e.g., 'topic1:broker1_ip' 'topic2:broker2_ip')")
     parser.add_argument("--port", type=int, default=DEFAULT_BROKER_PORT, help="Default MQTT broker port")
@@ -55,7 +69,21 @@ def parse_arguments():
 
 # --- MQTT Callbacks ---
 def on_connect_factory(broker_address, topic):
+    """
+    Factory function to create an on_connect callback for a specific broker and topic.
+
+    This allows each MQTT client to have a unique callback that logs its
+    connection status and subscribes to its designated topic.
+
+    Args:
+        broker_address (str): The address of the MQTT broker.
+        topic (str): The topic to subscribe to upon connection.
+
+    Returns:
+        function: The on_connect callback function.
+    """
     def on_connect(client, userdata, flags, rc, properties=None):
+        """Callback executed when the client connects to the MQTT broker."""
         if rc == 0:
             logging.info(f"Connected to MQTT Broker at {broker_address} for topic {topic}")
             client.subscribe(topic, qos=1)
@@ -66,12 +94,29 @@ def on_connect_factory(broker_address, topic):
 
 
 def on_disconnect_factory(broker_address):
+    """
+    Factory function to create an on_disconnect callback.
+
+    Args:
+        broker_address (str): The address of the MQTT broker for logging.
+
+    Returns:
+        function: The on_disconnect callback function.
+    """
     def on_disconnect(client, userdata, rc, properties=None):
-        logging.warning(f"Disconnected from MQTT Broker at {broker_address} (code: {rc}).")
+        """Callback executed when the client disconnects from the MQTT broker."""
+        logging.warning(
+            f"Disconnected from MQTT Broker at {broker_address} (code: {rc}).")
     return on_disconnect
 
 
 def on_message(client, userdata, message):
+    """
+    Callback executed when a message is received from an MQTT broker.
+
+    It calculates the latency from the timestamp in the message payload
+    and stores it for visualization.
+    """
     try:
         current_time = time.time()
         payload = json.loads(message.payload)
@@ -100,6 +145,15 @@ def on_message(client, userdata, message):
 
 # --- Dash App ---
 def create_dash_app(args):
+    """
+    Create and configure the Dash application for real-time visualization.
+
+    Args:
+        args: The parsed command-line arguments.
+
+    Returns:
+        dash.Dash: The configured Dash application instance.
+    """
     app = dash.Dash(__name__)
     app.layout = html.Div([
         html.H1("Real-Time TSN Latency Monitor"),
@@ -109,6 +163,19 @@ def create_dash_app(args):
 
     @app.callback(Output('latency-plot', 'figure'), Input('interval-update', 'n_intervals'))
     def update_plot(n):
+        """
+        Callback to update the latency plot at regular intervals.
+
+        This function is triggered by the dcc.Interval component. It prunes old
+        data, redraws the plot with the latest latency information, and adjusts
+        the y-axis dynamically to fit the data.
+
+        Args:
+            n (int): The number of intervals that have passed (not used).
+
+        Returns:
+            dict: A dictionary representing the updated Plotly figure.
+        """
         traces = []
         current_time = time.time()
         start_time = current_time - args.window_seconds
@@ -157,6 +224,16 @@ def create_dash_app(args):
 
 # --- Main Execution ---
 def main(args):
+    """
+    Main function to set up MQTT clients and run the Dash application.
+
+    Initializes data storage, configures and connects MQTT clients for each
+    specified topic-broker pair, and starts the web server for the
+    Dash visualization dashboard.
+
+    Args:
+        args: The parsed command-line arguments.
+    """
     # Initialize data storage
     for item in args.topic_brokers:
         topic, broker = item.split(':')
@@ -196,8 +273,16 @@ def main(args):
 
 
 def signal_handler(sig, frame):
+    """
+    Handle termination signals (SIGINT, SIGTERM) for graceful shutdown.
+
+    Args:
+        sig: The signal number.
+        frame: The current stack frame.
+    """
     logging.info("Termination signal received. Shutting down...")
     os.kill(os.getpid(), signal.SIGTERM)
+
 
 if __name__ == '__main__':
     args = parse_arguments()

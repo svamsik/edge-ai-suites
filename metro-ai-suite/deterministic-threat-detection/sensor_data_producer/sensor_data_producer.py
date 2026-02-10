@@ -1,3 +1,15 @@
+"""
+Simulated Sensor Data Producer for MQTT.
+
+This script simulates a sensor device that generates and publishes data to an MQTT
+broker at a specified rate. The data is sent as a JSON payload containing a
+timestamp, a sample number, and a simulated sensor value.
+
+It is intended for use in testing and demonstrating data pipelines, particularly
+in scenarios like the Time-Sensitive Networking (TSN) use case where a stream of
+time-stamped data is required.
+"""
+
 # 
 # Copyright (C) 2026 Intel Corporation. 
 # 
@@ -25,18 +37,28 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 running = True
 
 def on_connect(client, userdata, flags, rc, properties=None):
-    """Callback for when the client connects to the broker."""
+    """Callback executed when the client successfully connects to the MQTT broker."""
     if rc == 0:
         logging.info("Connected to MQTT Broker!")
     else:
         logging.error(f"Failed to connect, return code {rc}\n")
 
 def on_disconnect(client, userdata, rc, properties=None):
-    """Callback for when the client disconnects."""
-    logging.warning(f"Disconnected from MQTT Broker with result code {rc}. Reconnecting...")
+    """Callback executed when the client disconnects from the MQTT broker."""
+    logging.warning(
+        f"Disconnected from MQTT Broker with result code {rc}. Reconnecting...")
+
 
 def parse_arguments():
-    """Parse command-line arguments."""
+    """
+    Parse command-line arguments for the data producer.
+
+    Allows configuration of the MQTT broker address, port, topic, and the
+    publishing rate. Values can also be set via environment variables.
+
+    Returns:
+        argparse.Namespace: An object containing the parsed command-line arguments.
+    """
     parser = argparse.ArgumentParser(description="MQTT Sensor Data Producer")
     parser.add_argument("--broker", type=str, default=os.getenv("MQTT_BROKER", DEFAULT_BROKER),
                         help=f"MQTT broker address (default: {DEFAULT_BROKER})")
@@ -49,13 +71,30 @@ def parse_arguments():
     return parser.parse_args()
 
 def signal_handler(sig, frame):
-    """Handle termination signals for graceful shutdown."""
+    """
+    Handle termination signals (SIGINT, SIGTERM) for graceful shutdown.
+
+    Sets a global flag to signal the main loop to exit cleanly.
+
+    Args:
+        sig: The signal number.
+        frame: The current stack frame.
+    """
     global running
     logging.info("Termination signal received. Shutting down...")
     running = False
 
 def run_producer(args):
-    """Main function to run the data producer."""
+    """
+    Main function to connect to MQTT and run the data production loop.
+
+    This function initializes the MQTT client, connects to the broker, and enters
+    a loop to publish simulated sensor data at a precise rate determined by the
+    '--rate' argument. It handles connection errors and ensures a clean shutdown.
+
+    Args:
+        args: An object containing the parsed command-line arguments.
+    """
     global running
     interval = 1.0 / args.rate
 
