@@ -2,8 +2,6 @@
 
 This section collects guides for Pallet Defect Detection sample application.
 
-- [Deploy with Helm](./how-to-guides/deploy-with-helm.md)
-- [Deploy with Edge Orchestrator](./how-to-guides/deploy-with-edge-orchestrator.md)
 - [Manage pipelines](./how-to-guides/manage-pipelines.md)
 - [Run multiple AI pipelines](./how-to-guides/run-multiple-ai-pipelines.md)
 - [Use GPU For Inference](./how-to-guides/use-gpu-for-inference.md)
@@ -18,13 +16,13 @@ This section collects guides for Pallet Defect Detection sample application.
 - [Start MQTT publisher](./how-to-guides/start-mqtt-publisher.md)
 - [Benchmarks](./how-to-guides/benchmark.md)
 - [View Open Telemetry data](./how-to-guides/view-telemetry-data.md)
+- [Deploy multiple instances using Helm charts](./how-to-guides/deploy-multiple-instances-with-helm.md)
+- [Launching Multiple Instances of Apps](./how-to-guides/run-multiple-apps.md)
 
 <!--hide_directive
 :::{toctree}
 :hidden:
 
-./how-to-guides/deploy-with-helm
-./how-to-guides/deploy-with-edge-orchestrator
 ./how-to-guides/manage-pipelines
 ./how-to-guides/run-multiple-ai-pipelines
 ./how-to-guides/use-gpu-for-inference
