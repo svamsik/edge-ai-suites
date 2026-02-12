@@ -47,6 +47,12 @@ for video_name in "\${!video_urls[@]}"; do
         echo "Download \${video_name}..."
         curl -L -o "src/dlstreamer-pipeline-server/videos/\${video_name}" "\${video_urls[\$video_name]}" 
     fi
+    
+    avi_name="\${video_name%.mp4}.avi"
+    if [ ! -f src/dlstreamer-pipeline-server/videos/\${avi_name} ]; then
+        echo "Converting \${video_name} to \${avi_name} for lower decode latency..."
+        ffmpeg -y -i "src/dlstreamer-pipeline-server/videos/\${video_name}" -c:v copy -c:a copy "src/dlstreamer-pipeline-server/videos/\${avi_name}"
+    fi
 done
 
 echo "Fix ownership..."
