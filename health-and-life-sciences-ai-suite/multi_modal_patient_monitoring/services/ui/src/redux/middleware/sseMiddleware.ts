@@ -49,23 +49,29 @@ export const sseMiddleware: Middleware = (store) => {
           let parsedData: any = {};
 
           if (workloadType === 'rppg') {
-            // rPPG sends: HR, RR, SpO2, waveform
-            parsedData = {
-              HR: payload.HR ?? payload.heart_rate,
-              RR: payload.RR ?? payload.respiratory_rate ?? payload.value,
-              SpO2: payload.SpO2 ?? payload.spo2,
-            };
+            // rPPG sends: HEART_RATE, RESP_RATE, SpO2, waveform
+            const metricType = payload.metric;
+            
+            if (metricType === 'HEART_RATE') {
+              parsedData.HR = payload.value ?? payload.HR;
+            } else if (metricType === 'RESP_RATE') {
+              parsedData.RR = payload.value ?? payload.RR;
+            } else if (metricType === 'SPO2') {
+              parsedData.SpO2 = payload.value ?? payload.SpO2;
+            }
             
             // Extract waveform if present
             if (payload.waveform && Array.isArray(payload.waveform)) {
               parsedData.waveform = payload.waveform;
+              parsedData.waveformFrequency = payload.fs || payload.waveform_frequency_hz;
             }
             
             console.log('[SSE] ✓ Parsed rPPG:', {
+              metric: metricType,
               vitals: { HR: parsedData.HR, RR: parsedData.RR, SpO2: parsedData.SpO2 },
               waveformLength: parsedData.waveform?.length
             });
-
+          
           } else if (workloadType === 'ai-ecg') {
             console.log('[SSE] 🔬 AI-ECG raw payload:', JSON.stringify(payload, null, 2));
             
@@ -93,53 +99,78 @@ export const sseMiddleware: Middleware = (store) => {
             });
             
           } else if (workloadType === 'mdpnp') {
-            // MDPNP sends: device_type + metric + value/waveform
             console.log('[SSE] 🏥 MDPNP raw payload:', JSON.stringify(payload, null, 2));
             
             const eventType = rawData.event_type;
             const deviceType = rawData.device_type || payload.device_type;
             
             if (eventType === 'numeric') {
-              // Map device metrics to unified vitals
               const metric = payload.metric;
               
+              // ECG_Simulator metrics
               if (metric === 'MDC_ECG_HEART_RATE') {
                 parsedData.HR = payload.value;
-                console.log('[SSE] ✓ MDPNP HR:', payload.value);
+                console.log('[SSE] ✓ MDPNP ECG HR:', payload.value);
               } 
+              else if (metric === 'MDC_TTHOR_RESP_RATE') {
+                parsedData.RR = payload.value;
+                console.log('[SSE] ✓ MDPNP Respiration Rate:', payload.value);
+              }
+              
+              // CO2_Simulator metrics
               else if (metric === 'MDC_AWAY_CO2_ET') {
                 parsedData.CO2_ET = payload.value;
                 console.log('[SSE] ✓ MDPNP CO2_ET:', payload.value);
+              }
+              else if (metric === 'MDC_CO2_RESP_RATE') {
+                parsedData.CO2_RR = payload.value;
+                console.log('[SSE] ✓ MDPNP CO2 Respiration Rate:', payload.value);
+              }
+              
+              // IBP_Simulator metrics
+              else if (metric === 'MDC_PRESS_BLD_ART_ABP_SYS') {
+                parsedData.BP_SYS = payload.value;
+                console.log('[SSE] ✓ MDPNP BP Systolic:', payload.value);
               } 
               else if (metric === 'MDC_PRESS_BLD_ART_ABP_DIA') {
                 parsedData.BP_DIA = payload.value;
-                console.log('[SSE] ✓ MDPNP BP_DIA:', payload.value);
+                console.log('[SSE] ✓ MDPNP BP Diastolic:', payload.value);
               }
             } 
             else if (eventType === 'waveform') {
-              // Extract waveform based on device type
               if (payload.waveform && Array.isArray(payload.waveform)) {
-                // Store waveform with device identifier
-                if (payload.metric === 'MDC_ECG_LEAD_II') {
+                const metric = payload.metric;
+                
+                if (metric === 'MDC_ECG_LEAD_II') {
                   parsedData.waveform = payload.waveform;
                   parsedData.waveformType = 'ECG';
-                  console.log('[SSE] ✓ MDPNP ECG waveform:', payload.waveform.length, 'samples');
+                  parsedData.waveformFrequency = payload.waveform_frequency_hz;
+                  console.log('[SSE] ✓ MDPNP ECG waveform:', payload.waveform.length, 'samples @', payload.waveform_frequency_hz, 'Hz');
                 } 
-                else if (payload.metric === 'MDC_AWAY_CO2') {
+                else if (metric === 'MDC_AWAY_CO2') {
                   parsedData.waveform = payload.waveform;
                   parsedData.waveformType = 'CO2';
-                  console.log('[SSE] ✓ MDPNP CO2 waveform:', payload.waveform.length, 'samples');
+                  parsedData.waveformFrequency = payload.waveform_frequency_hz;
+                  console.log('[SSE] ✓ MDPNP CO2 waveform:', payload.waveform.length, 'samples @', payload.waveform_frequency_hz, 'Hz');
                 } 
-                else if (payload.metric === 'MDC_PRESS_BLD') {
+                else if (metric === 'MDC_PRESS_BLD') {
                   parsedData.waveform = payload.waveform;
                   parsedData.waveformType = 'BP';
-                  console.log('[SSE] ✓ MDPNP BP waveform:', payload.waveform.length, 'samples');
+                  parsedData.waveformFrequency = payload.waveform_frequency_hz;
+                  console.log('[SSE] ✓ MDPNP BP waveform:', payload.waveform.length, 'samples @', payload.waveform_frequency_hz, 'Hz');
                 }
               }
             }
             
             console.log('[SSE] ✓ Parsed MDPNP:', {
-              vitals: { HR: parsedData.HR, CO2_ET: parsedData.CO2_ET, BP_DIA: parsedData.BP_DIA },
+              vitals: { 
+                HR: parsedData.HR, 
+                RR: parsedData.RR,
+                CO2_ET: parsedData.CO2_ET, 
+                CO2_RR: parsedData.CO2_RR,
+                BP_SYS: parsedData.BP_SYS,
+                BP_DIA: parsedData.BP_DIA 
+              },
               waveformType: parsedData.waveformType,
               waveformLength: parsedData.waveform?.length
             });

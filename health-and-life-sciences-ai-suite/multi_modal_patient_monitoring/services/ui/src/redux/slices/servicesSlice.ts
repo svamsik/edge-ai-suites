@@ -6,6 +6,8 @@ interface WorkloadState {
   latestData: Record<string, any>;
   lastEventTime: number | null;
   waveform?: number[];
+  waveformType?: string; // Add this to track waveform source
+  waveformFrequency?: number; // Add this for frequency info
   frameData?: string;
   joints?: Array<{
     x: number;

@@ -11,26 +11,28 @@ ENV http_proxy=${http_proxy:-$HTTP_PROXY} \
     https_proxy=${https_proxy:-$HTTPS_PROXY} \
     no_proxy=${no_proxy:-$NO_PROXY}
 
-# GPU driver setup
+# GPU support (if using OpenVINO with GPU plugin, ensure the base image has necessary drivers/libraries)
 ARG INSTALL_DRIVER_VERSION="25.31.34666"
 ARG USER_ID=1000
 ARG USER_GROUP_ID=1000
 
 RUN groupadd -g ${USER_GROUP_ID} appuser && useradd -m -s /bin/bash -u ${USER_ID} -g ${USER_GROUP_ID} appuser
 
-# Install system dependencies including Intel GPU drivers
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    libgl1 libglib2.0-0 \
-    libsm6 libxext6 libxrender1 libgomp1 \
-    libnuma1 ocl-icd-libopencl1 \
+RUN apt-get update -y && apt-get install -y --no-install-recommends --fix-missing \
     curl \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* 
 
-# Copy GPU driver script from the correct location (relative to build context)
-COPY src/tmp/scripts/intel_gpu_drivers.sh /tmp/install_gpu_drivers.sh
-RUN chmod +x /tmp/install_gpu_drivers.sh && \
-    INSTALL_DRIVER_VERSION=$INSTALL_DRIVER_VERSION /tmp/install_gpu_drivers.sh && \
-    rm -rf /tmp/install_gpu_drivers.sh /var/lib/apt/lists/* /tmp/* /root/.cache
+COPY ./scripts/install_ubuntu_gpu_drivers.sh /tmp/install_gpu_drivers.sh
+RUN chmod +x /tmp/install_gpu_drivers.sh
+RUN /tmp/install_gpu_drivers.sh
+
+# Intel NPU user-space drivers (linux-npu-driver + Level Zero)
+COPY ./scripts/install_ubuntu_npu_drivers.sh /tmp/install_npu_drivers.sh
+RUN chmod +x /tmp/install_npu_drivers.sh
+RUN /tmp/install_npu_drivers.sh
+
+RUN apt-get clean && rm -rf /tmp/install_gpu_drivers.sh /tmp/install_npu_drivers.sh && rm -rf /var/lib/apt/lists/* && rm -rf /tmp/* && rm -rf /root/.cachetmp/*
+
 
 WORKDIR /app
 
