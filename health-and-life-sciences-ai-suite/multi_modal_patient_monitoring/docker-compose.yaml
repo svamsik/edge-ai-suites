@@ -242,7 +242,8 @@ services:
       patient-monitoring-aggregator:
           condition: service_started  
     environment:
-      - RPPG_DEVICE=${RPPG_DEVICE}      
+      - RPPG_DEVICE=${RPPG_DEVICE}   
+      - ZE_ENABLE_ALT_DRIVERS=libze_intel_npu.so   
     env_file:
       - ./configs/device.env  
     volumes:
