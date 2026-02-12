@@ -51,7 +51,13 @@ for video_name in "\${!video_urls[@]}"; do
     avi_name="\${video_name%.mp4}.avi"
     if [ ! -f src/dlstreamer-pipeline-server/videos/\${avi_name} ]; then
         echo "Converting \${video_name} to \${avi_name} for lower decode latency..."
-        ffmpeg -y -i "src/dlstreamer-pipeline-server/videos/\${video_name}" -c:v copy -c:a copy "src/dlstreamer-pipeline-server/videos/\${avi_name}"
+        ffmpeg -y -i "src/dlstreamer-pipeline-server/videos/\${video_name}" -c:v copy -c:a copy -r 30 "src/dlstreamer-pipeline-server/videos/\${avi_name}"
+    fi
+    
+    h264_name="\${video_name%.mp4}.h264"
+    if [ ! -f src/dlstreamer-pipeline-server/videos/\${h264_name} ]; then
+        echo "Converting \${video_name} to \${h264_name} for minimal decode latency..."
+        ffmpeg -y -i "src/dlstreamer-pipeline-server/videos/\${video_name}" -c:v copy -bsf:v h264_mp4toannexb -an "src/dlstreamer-pipeline-server/videos/\${h264_name}"
     fi
 done
 
