@@ -126,7 +126,7 @@
    -------------------------------------------
    Environment variables loaded from /home/intel/IRD/edge-ai-suites/manufacturing-ai-suite/industrial-edge-insights-vision/helm/temp_apps/pallet-defect-detection/pdd1/.env
    Running sample app: pallet-defect-detection
-   Using Helm deployment - curl commands will use: 10.223.23.150:30443
+   Using Helm deployment - curl commands will use: <HOST_IP>:<NGINX_HTTPS_PORT>
    Checking status of dlstreamer-pipeline-server...
    Server reachable. HTTP Status Code: 200
    Getting list of loaded pipelines...
@@ -150,7 +150,7 @@
    -------------------------------------------
    Environment variables loaded from /home/intel/IRD/edge-ai-suites/manufacturing-ai-suite/industrial-edge-insights-vision/helm/temp_apps/pallet-defect-detection/pdd2/.env
    Running sample app: pallet-defect-detection
-   Using Helm deployment - curl commands will use: 10.223.23.150:30444
+   Using Helm deployment - curl commands will use: <HOST_IP>:<NGINX_HTTPS_PORT>
    Checking status of dlstreamer-pipeline-server...
    Server reachable. HTTP Status Code: 200
    Getting list of loaded pipelines...
@@ -174,7 +174,7 @@
    -------------------------------------------
    Environment variables loaded from /home/intel/IRD/edge-ai-suites/manufacturing-ai-suite/industrial-edge-insights-vision/helm/temp_apps/weld-porosity/weld1/.env
    Running sample app: weld-porosity
-   Using Helm deployment - curl commands will use: 10.223.23.150:30445
+   Using Helm deployment - curl commands will use: <HOST_IP>:<NGINX_HTTPS_PORT>
    Checking status of dlstreamer-pipeline-server...
    Server reachable. HTTP Status Code: 200
    Getting list of loaded pipelines...
@@ -307,7 +307,7 @@
 2. Start the pipeline for <INSTANCE_NAME>:
 
    ```bash
-   ./sample_start.sh -i <INSTANCE_NAME> -p <PIPELINE_NAME>
+   ./sample_start.sh helm -i <INSTANCE_NAME> -p <PIPELINE_NAME>
    ```
 
    Output:
@@ -343,7 +343,7 @@
 1. Fetch the list of pipeline for <INSTANCE_NAME>:
 
    ```bash
-   ./sample_list.sh -i <INSTANCE_NAME>
+   ./sample_list.sh helm -i <INSTANCE_NAME>
    ```
 
     Example Output:
@@ -375,7 +375,7 @@
 
    ```text
    Instance name set to: pdd1
-   Custom payload file set to: custom_payload_corrected.json
+   Custom payload file set to: custom_payload.json
    Starting specified pipeline(s)...
    Found SAMPLE_APP: pallet-defect-detection for INSTANCE_NAME: pdd1
    Environment variables loaded from /home/intel/IRD/edge-ai-suites/manufacturing-ai-suite/industrial-edge-insights-vision/helm/temp_apps/pallet-defect-detection/pdd1/.env
@@ -383,7 +383,7 @@
    Using Helm deployment - curl commands will use: <HOST_IP>:<NGINX_HTTPS_PORT>
    Checking status of dlstreamer-pipeline-server...
    Server reachable. HTTP Status Code: 200
-   Loading payload from custom_payload_corrected.json
+   Loading payload from custom_payload.json
    Payload loaded successfully.
    Starting pipeline: pallet_defect_detection_gpu
    Launching pipeline: pallet_defect_detection_gpu
