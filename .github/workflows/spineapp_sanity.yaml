@@ -42,7 +42,7 @@ jobs:
       with:
         persist-credentials: false
         path: edge-ai-suites-repo
-        ref: jj/ird/multi-compose
+        ref: ${{ steps.get_branch.outputs.branch }}
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
