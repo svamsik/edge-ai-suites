@@ -68,7 +68,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Install Robot Framework with pip (cached)
-        run: pip3 install robotframework selenium PyYAML
+        run: pip3 install robotframework selenium PyYAML requests
       - name: Install required packages
         run: |
           sudo apt-get update
@@ -78,10 +78,10 @@ jobs:
         run: |
           
           cd edge-ai-suites-repo/metro-ai-suite/metro-vision-ai-app-recipe/test-suite/robot_files
-          robot test_helm.robot || true  &
+          robot test_helm.robot || true 
           
           mkdir -p /tmp/test_results/Helm
-          cp -r report.html log.html output.xml dlsps_logs.txt /tmp/test_results/Helm
+          cp -r report.html log.html output.xml  /tmp/test_results/Helm
           passed=$(xmllint --xpath "//return/status[@status='PASS']" ./output.xml | wc -l) || true
           failed=$(xmllint --xpath "//return/status[@status='FAIL']" ./output.xml | wc -l) || true
           not_run=$(xmllint --xpath "//return/status[@status='NOT RUN']" ./output.xml | wc -l) || true
