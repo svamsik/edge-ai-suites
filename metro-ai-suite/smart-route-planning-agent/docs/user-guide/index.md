@@ -26,7 +26,7 @@ The Smart Route Planning Agent is an AI-powered route optimization agent that us
 
 The agent receives source and destination inputs, finds the shortest route from available routes, queries traffic intersection agents for live reports, and determines the optimal route.
 
-![System Architecture Diagram](./_images/ITS_architecture.png)
+![System Architecture Diagram](./_assets/ITS_architecture.png)
 
 ### Data Flow
 
@@ -51,7 +51,6 @@ User Input (Source/Destination) → Route Planning Agent
 get-started
 system-requirements
 environment-variables
-traffic-data-analysis-workflow
 build-from-source
 release-notes
 
