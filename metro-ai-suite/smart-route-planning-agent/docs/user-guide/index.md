@@ -14,7 +14,7 @@ The Smart Route Planning Agent is an AI-powered route optimization agent that us
 
 **Multi-Agent Traffic Analysis**: Communicates with [Smart Traffic Intersection Agent](../../../../smart-traffic-intersection-agent/README.md) to gather live analysis reports for informed routing decisions.
 
-## Key Features
+### Key Features
 
 **AI Agent Architecture**: Intelligent agent that coordinates with other agents to fetch and analyze traffic data.
 
