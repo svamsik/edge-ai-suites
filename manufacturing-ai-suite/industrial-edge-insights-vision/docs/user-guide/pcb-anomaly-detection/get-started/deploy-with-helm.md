@@ -437,7 +437,7 @@ Applications can take advantage of S3 publish feature from DL Streamer Pipeline 
                },
                "parameters": {
                    "classification-properties": {
-                       "model": "/home/pipeline-server/resources/models/deployment/Anomaly classification/model/model.xml",
+                       "model": "/home/pipeline-server/resources/models/new-model/deployment/Anomaly classification/model/model.xml",
                        "device": "CPU"
                    }
                }
