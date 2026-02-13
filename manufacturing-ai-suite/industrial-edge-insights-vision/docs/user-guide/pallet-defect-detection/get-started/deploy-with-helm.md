@@ -456,7 +456,8 @@ Applications can take advantage of S3 publish feature from DL Streamer Pipeline 
 
 10. View the WebRTC streaming on `https://<HOST_IP>:30443/mediamtx/<peer-str-id>/` by replacing `<peer-str-id>` with the value used in the original cURL command to start the pipeline.
 
-
+   ![WebRTC streaming](../_assets/webrtc-streaming.png)
+   
 ## Troubleshooting
 
 - [Troubleshooting Guide](../troubleshooting.md)
