@@ -35,7 +35,7 @@ For Docker Compose tool installation, see [Overview of installing Docker Compose
 
 ## Validation
 
-Ensure all required software are installed and configured before proceeding to [Get Started](./get-started.md).
+Ensure all required software is installed and configured before proceeding to [Get Started](./get-started.md).
 
 ## Learn More
 
