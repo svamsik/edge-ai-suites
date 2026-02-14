@@ -16,7 +16,8 @@ This sample application showcases how TSN can be used to protect latency-sensiti
 
 ## How It Works
 
-<placeholder-for-high-level-diagram>
+![DTD High-Level Architecture](./docs/user-guide/_images/deterministic-threat-detection-architecture.svg)
+
 
 In this use case, multiple RTSP cameras stream video to edge compute nodes for AI inference, while sensor data producers generate telemetry data concurrently. Both the inference results and the sensor data are published via MQTT messages. These messages include PTP timestamps, which allow for precise latency measurements at the receiver.
 
