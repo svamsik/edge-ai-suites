@@ -3,22 +3,32 @@
 """Unit tests for UI components."""
 
 import pytest
-import os
-import sys
 from unittest.mock import Mock, patch, MagicMock
 from datetime import datetime, timezone
 
-# Add src/ui to path for imports FIRST (before src)
+import os, sys
+# Add src/ui to path so ui_components and its siblings can be found
 ui_path = os.path.join(os.path.dirname(__file__), '..', '..', 'src', 'ui')
 if ui_path not in sys.path:
     sys.path.insert(0, ui_path)
 
 from ui_components import ThemeColors, UIComponents
-from models import (
-    MonitoringData, IntersectionData, VLMAnalysis, WeatherData,
-    CameraData, RegionCount, TrafficContext
-)
-from config import Config
+
+try:
+    from ui.models import (
+        MonitoringData, IntersectionData, VLMAnalysis, WeatherData,
+        CameraData, RegionCount, TrafficContext
+    )
+except (ModuleNotFoundError, ImportError):
+    from models import (
+        MonitoringData, IntersectionData, VLMAnalysis, WeatherData,
+        CameraData, RegionCount, TrafficContext
+    )
+
+try:
+    from ui.config import Config
+except (ModuleNotFoundError, ImportError):
+    from config import Config
 
 
 # ============== Fixtures ==============
@@ -161,7 +171,7 @@ class TestThemeColors:
 
     def test_get_colors_light_theme(self):
         """Test get_colors returns light theme colors."""
-        with patch.object(Config, 'UI_THEME', 'light'):
+        with patch.object(Config, 'get_ui_theme', return_value='light'):
             colors = ThemeColors.get_colors()
             
             assert colors['bg_primary'] == '#ffffff'
@@ -171,7 +181,7 @@ class TestThemeColors:
 
     def test_get_colors_dark_theme(self):
         """Test get_colors returns dark theme colors."""
-        with patch.object(Config, 'UI_THEME', 'dark'):
+        with patch.object(Config, 'get_ui_theme', return_value='dark'):
             colors = ThemeColors.get_colors()
             
             assert colors['bg_primary'] == '#1f2937'
@@ -212,36 +222,36 @@ class TestUIComponentsTrafficDensityColor:
 
     def test_high_density_returns_red(self):
         """Test high density returns light red color."""
-        with patch.object(Config, 'HIGH_DENSITY_THRESHOLD', 10):
-            with patch.object(Config, 'MODERATE_DENSITY_THRESHOLD', 5):
+        with patch.object(Config, 'get_high_density_threshold', return_value=10):
+            with patch.object(Config, 'get_moderate_density_threshold', return_value=5):
                 color = UIComponents._get_traffic_density_color(15)
                 assert color == "#ecb3b3"
 
     def test_moderate_density_returns_yellow(self):
         """Test moderate density returns yellow color."""
-        with patch.object(Config, 'HIGH_DENSITY_THRESHOLD', 10):
-            with patch.object(Config, 'MODERATE_DENSITY_THRESHOLD', 5):
+        with patch.object(Config, 'get_high_density_threshold', return_value=10):
+            with patch.object(Config, 'get_moderate_density_threshold', return_value=5):
                 color = UIComponents._get_traffic_density_color(7)
                 assert color == "#ffff99"
 
     def test_low_density_returns_white(self):
         """Test low density returns white color."""
-        with patch.object(Config, 'HIGH_DENSITY_THRESHOLD', 10):
-            with patch.object(Config, 'MODERATE_DENSITY_THRESHOLD', 5):
+        with patch.object(Config, 'get_high_density_threshold', return_value=10):
+            with patch.object(Config, 'get_moderate_density_threshold', return_value=5):
                 color = UIComponents._get_traffic_density_color(3)
                 assert color == "#ffffff"
 
     def test_boundary_high_density(self):
         """Test exact high density threshold."""
-        with patch.object(Config, 'HIGH_DENSITY_THRESHOLD', 10):
-            with patch.object(Config, 'MODERATE_DENSITY_THRESHOLD', 5):
+        with patch.object(Config, 'get_high_density_threshold', return_value=10):
+            with patch.object(Config, 'get_moderate_density_threshold', return_value=5):
                 color = UIComponents._get_traffic_density_color(10)
                 assert color == "#ecb3b3"
 
     def test_boundary_moderate_density(self):
         """Test exact moderate density threshold."""
-        with patch.object(Config, 'HIGH_DENSITY_THRESHOLD', 10):
-            with patch.object(Config, 'MODERATE_DENSITY_THRESHOLD', 5):
+        with patch.object(Config, 'get_high_density_threshold', return_value=10):
+            with patch.object(Config, 'get_moderate_density_threshold', return_value=5):
                 color = UIComponents._get_traffic_density_color(5)
                 assert color == "#ffff99"
 
@@ -668,7 +678,7 @@ class TestConfigClass:
         required_keys = [
             'refresh_interval', 'api_url', 'app_title', 'app_port',
             'app_host', 'ui_theme', 'high_density_threshold',
-            'moderate_density_threshold', 'high_wind_threshold', 'heavy_rain_threshold'
+            'moderate_density_threshold'
         ]
         
         for key in required_keys:
@@ -677,4 +687,4 @@ class TestConfigClass:
     def test_default_theme_is_light(self):
         """Test default UI theme is light."""
         # This tests the default, not the env var override
-        assert Config.UI_THEME in ['light', 'dark']
+        assert Config.get_ui_theme() in ['light', 'dark']

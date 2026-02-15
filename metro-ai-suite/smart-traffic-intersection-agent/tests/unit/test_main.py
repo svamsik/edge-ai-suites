@@ -354,7 +354,7 @@ class TestMainFunction:
 
     def test_main_uses_custom_port(self):
         """Test main uses custom port from environment."""
-        with patch.dict(os.environ, {"TRAFFIC_INTERSECTION_AGENT_PORT": "9090"}):
+        with patch.dict(os.environ, {"AGENT_BACKEND_HOSTPORT": "9090"}):
             with patch('main.create_app') as mock_create_app, \
                  patch('main.uvicorn.run') as mock_run:
                 
@@ -386,7 +386,7 @@ class TestMainFunction:
 
     def test_main_uses_custom_host(self):
         """Test main uses custom host from environment."""
-        with patch.dict(os.environ, {"TRAFFIC_INTERSECTION_AGENT_HOST": "127.0.0.1"}):
+        with patch.dict(os.environ, {"AGENT_BACKEND_HOST": "127.0.0.1"}):
             with patch('main.create_app') as mock_create_app, \
                  patch('main.uvicorn.run') as mock_run:
                 
@@ -556,8 +556,8 @@ class TestEnvironmentVariables:
         custom_env = {
             "API_NAME": "My Custom Agent",
             "LOG_LEVEL": "WARNING",
-            "TRAFFIC_INTERSECTION_AGENT_PORT": "3000",
-            "TRAFFIC_INTERSECTION_AGENT_HOST": "localhost"
+            "AGENT_BACKEND_HOSTPORT": "3000",
+            "AGENT_BACKEND_HOST": "localhost"
         }
         
         with patch.dict(os.environ, custom_env):

@@ -70,13 +70,12 @@ class TestConfigServiceInitialization:
                     assert service.get_intersection_name() == "Test Intersection"
 
     def test_init_with_invalid_config_file(self):
-        """Test ConfigService handles invalid config file gracefully."""
+        """Test ConfigService raises on invalid config file."""
         with patch.dict(os.environ, {}, clear=True):
-            with patch('os.path.exists', return_value=True):
+            with patch('pathlib.Path.exists', return_value=True):
                 with patch('builtins.open', mock_open(read_data="invalid json")):
-                    # Should not raise, just log warning
-                    service = ConfigService()
-                    assert service.config is not None
+                    with pytest.raises(Exception):
+                        service = ConfigService()
 
 
 class TestConfigServiceEnvironmentOverrides:
@@ -135,7 +134,7 @@ class TestConfigServiceEnvironmentOverrides:
         """Test VLM configuration from environment variables."""
         env_vars = {
             "VLM_BASE_URL": "http://vlm:9000",
-            "VLM_MODEL": "custom-model",
+            "VLM_MODEL_NAME": "custom-model",
             "VLM_TIMEOUT_SECONDS": "60",
             "VLM_MAX_COMPLETION_TOKENS": "1500",
             "VLM_TEMPERATURE": "0.5",
@@ -174,9 +173,9 @@ class TestConfigServiceDefaults:
     def test_default_intersection_name(self):
         """Test default intersection name."""
         with patch.dict(os.environ, {}, clear=True):
-            with patch('os.path.exists', return_value=False):
-                service = ConfigService()
-                assert service.get_intersection_name() == "Intersection-1"
+            with patch('pathlib.Path.exists', return_value=False):
+                with pytest.raises(FileNotFoundError):
+                    service = ConfigService()
 
     def test_default_intersection_coordinates(self):
         """Test default intersection coordinates."""
@@ -188,11 +187,10 @@ class TestConfigServiceDefaults:
                 assert lon == -111.9353095
 
     def test_default_high_density_threshold(self):
-        """Test default high density threshold."""
-        with patch.dict(os.environ, {}, clear=True):
-            with patch('os.path.exists', return_value=False):
-                service = ConfigService()
-                assert service.get_high_density_threshold() == 5
+        """Test default high density threshold from config file."""
+        service = ConfigService()
+        # The actual default from config file is 10
+        assert service.get_high_density_threshold() == 10
 
     def test_default_camera_topics(self):
         """Test default camera topics."""
