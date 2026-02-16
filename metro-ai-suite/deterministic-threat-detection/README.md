@@ -1,10 +1,13 @@
 # Deterministic Threat Detection with Time-Sensitive Networking (TSN)
 
-This project demonstrates a Time-Sensitive Networking (TSN) sample application for deterministic, low-latency delivery of AI-processed video and sensor data in a shared network with other traffic.
+This project demonstrates a Time-Sensitive Networking (TSN) sample application for
+deterministic, low-latency delivery of AI-processed video and sensor data in a shared network
+with other traffic.
 
 ## Overview
 
-This sample application showcases how TSN can be used to protect latency-sensitive AI and sensor workloads in industrial and edge AI deployments. It demonstrates:
+This sample application showcases how TSN can be used to protect latency-sensitive AI and
+sensor workloads in industrial and edge AI deployments. It demonstrates:
 
 - Multi-camera video acquisition over Ethernet
 - Precise time synchronization using **IEEE 802.1AS (gPTP)**
@@ -18,8 +21,13 @@ This sample application showcases how TSN can be used to protect latency-sensiti
 
 ![DTD High-Level Architecture](./docs/user-guide/_images/deterministic-threat-detection-architecture.svg)
 
+The use case involves multiple RTSP cameras streaming video to edge compute nodes for AI
+inference. Simultaneously, a sensor data producer generates telemetry data. Both inference
+results and sensor data are published over MQTT.
 
-In this use case, multiple RTSP cameras stream video to edge compute nodes for AI inference, while sensor data producers generate telemetry data concurrently. Both the inference results and the sensor data are published via MQTT messages. These messages include PTP timestamps, which allow for precise latency measurements at the receiver.
+An aggregation node measures the end-to-end latency. By injecting background traffic and then
+enabling TSN features, the demonstration shows how TSN provides consistent and deterministic
+latency for critical data streams.
 
 To ensure synchronized operations across all devices, every machine in the system uses Precision Time Protocol (PTP) to align their clocks accurately.
 
