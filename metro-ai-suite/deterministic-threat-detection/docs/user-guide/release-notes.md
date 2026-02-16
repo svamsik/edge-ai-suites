@@ -4,7 +4,7 @@
 
 ## Version 1.0.0
 
-**Release Date**: 2026-02-13
+**Release Date**: 2026-03-25
 
 ### New Features
 
