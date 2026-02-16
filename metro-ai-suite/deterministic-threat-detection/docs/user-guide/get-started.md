@@ -12,7 +12,7 @@ system in action.
 
 ## Network Topology
 
-![TSN Network Topology](./_images/TSN-Network-Topology.svg)
+![TSN Network Topology](./_assets/TSN-Network-Topology.svg)
 
 The experimental setup consists of:
 
