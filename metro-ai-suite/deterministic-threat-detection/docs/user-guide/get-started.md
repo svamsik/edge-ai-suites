@@ -122,7 +122,6 @@ All machines are connected to the MOXA switch and synchronized using PTP.
 :::{toctree}
 :hidden:
 
-get-started
 how-to-configure-moxa-switch‎
 how-to-configure-ptp
 how-to-configure-vlan-on-moxa-switch
