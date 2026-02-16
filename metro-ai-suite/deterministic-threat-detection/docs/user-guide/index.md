@@ -12,6 +12,7 @@ This project demonstrates how to achieve deterministic, low-latency delivery of 
 
 get-started
 how-to-guides
+release-notes
 
 :::
 hide_directive-->
