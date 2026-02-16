@@ -12,6 +12,7 @@ how-to-run-mqtt-aggregator-and-visualization
 how-to-run-rtsp-camera-and-ai-inference
 how-to-run-sensor-data-producer
 how-to-run-traffic-injector
+release-notes
 
 Source Code < https://github.com/open-edge-platform/edge-ai-suites/blob/main/metro-ai-suite/deterministic-threat-detection/docs/user-guide>
 :::
