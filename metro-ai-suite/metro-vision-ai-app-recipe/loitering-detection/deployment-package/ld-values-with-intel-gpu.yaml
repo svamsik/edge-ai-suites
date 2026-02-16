@@ -12,5 +12,5 @@ webrtcturnserver:
   password: # example: password: mypassword
 gpu:
   enabled: true
-  type: # example: type: "gpu.intel.com/i915" or type: "nvidia.com/gpu"
+  type: # example: type: "gpu.intel.com/i915, gpu.intel.com/xe"
   count: # example: count: 1
