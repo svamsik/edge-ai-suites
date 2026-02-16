@@ -42,6 +42,6 @@ how-to-run-traffic-injector
 release-notes
 how-tos
 
-Source Code < https://github.com/open-edge-platform/edge-ai-suites/blob/main/metro-ai-suite/deterministic-threat-detection/docs/user-guide>
+Source Code < https://github.com/open-edge-platform/edge-ai-suites/tree/main/metro-ai-suite/deterministic-threat-detection/docs/user-guide >
 :::
 hide_directive-->
