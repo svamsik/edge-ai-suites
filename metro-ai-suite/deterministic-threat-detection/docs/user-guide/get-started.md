@@ -125,9 +125,9 @@ All machines are connected to the MOXA switch and synchronized using PTP.
 how-to-configure-moxa-switch
 how-to-configure-ptp
 how-to-configure-vlan-on-moxa-switch
-how-to-configure-vlan-on-all-machines
+how-to-create-vlan-on-all-machines
 how-to-enable-tsn-traffic-shaping
-how-it-run-mqtt-aggregator-and-visualization
+how-to-run-mqtt-aggregator-and-visualization
 how-to-run-rtsp-camera-and-ai-inference
 how-to-run-sensor-data-producer
 how-to-run-traffic-injector
