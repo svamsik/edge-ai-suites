@@ -21,6 +21,16 @@ This page provides detailed hardware, software, and platform requirements to hel
 | **Memory**          | 16 GB                     | 16 GB                   |
 | **Disk Space**      | 64 GB                | 128 GB               |
 
+### Supported platforms
+The pallet defect detection model for this sample app has been tested to work on the following platforms/XPU(s)
+
+| Product / Family     | CPU |  iGPU |  NPU | dGPU |
+|----------------------|-----------|------------|-----------|----------|
+| Core Ultra Series (3,2,1), 14th, 13th and 12th Gen  | ✓         | ✓          | ✓         |          |
+| Xeon(R) Platinum 8468V                 | ✓         |            |           | Intel(R) Arc(TM) A770        |
+
+
+
 ## Software Requirements
 
 **Required Software**:
