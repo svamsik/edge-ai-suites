@@ -89,7 +89,7 @@ By following this guide, you will learn how to:
 
       </details>
 
-      <details open>
+      <details>
       <summary>
       Windows Instructions
       </summary>
@@ -99,7 +99,7 @@ By following this guide, you will learn how to:
 
       docker pull openvino/ubuntu22_dev:2024.6.0
       $MODELS_PATH="$PWD\models"
-
+      # Download and convert the ResNet-50 model
       docker run --rm `
           -e http_proxy `
           -e https_proxy `
@@ -110,7 +110,8 @@ By following this guide, you will learn how to:
           omz_converter --name resnet-50-pytorch --download_dir models --output_dir models &&
           cp -r ./models/public/resnet-50-pytorch /output
           "
-
+      # Download and quantize the yolov11s model
+      docker pull docker.io/intel/dlstreamer:2025.1.2-ubuntu24
       docker run --rm --user=root `
         -e http_proxy `
         -e https_proxy `
