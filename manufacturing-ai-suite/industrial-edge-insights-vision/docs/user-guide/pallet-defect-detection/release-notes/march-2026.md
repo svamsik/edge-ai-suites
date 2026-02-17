@@ -1,8 +1,8 @@
 # March 2026
 
-## v2.4.0
+## v2.6.0
 
-### Updates in v2.4.0
+### Updates in v2.6.0
 
 - NGINX,COTURN and MINIO ports made configurable as environment variables
 - Added support for simultaneous deployment of multiple applications in the same host via docker and helm
