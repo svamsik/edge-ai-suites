@@ -20,7 +20,7 @@ function run_sample() {
     payload=$(cat <<EOF
    {
     "source": {
-        "uri": "file:///home/pipeline-server/videos/new_video_$x.avi",
+        "uri": "file:///home/pipeline-server/videos/new_video_$x.mp4",
         "type": "uri"
     },
     "destination": {
