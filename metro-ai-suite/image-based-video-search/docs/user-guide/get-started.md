@@ -71,7 +71,7 @@ By following this guide, you will learn how to:
 
       export MODELS_PATH=/output
       chmod +x /home/dlstreamer/dlstreamer/samples/download_public_models.sh
-      if [ ! -e "src/dlstreamer-pipeline-server/models/public/yolo11s/INT8/yolo11s.xml" ]; then
+      if [ ! -e "src/dlstreamer-pipeline-server/models/public/yolo11s/FP16/yolo11s.xml" ]; then
           for attempt in {1..3}; do
               echo "Attempt $attempt: Running model download and quantization..."
               if /home/dlstreamer/dlstreamer/samples/download_public_models.sh yolo11s coco128; then
@@ -125,7 +125,7 @@ By following this guide, you will learn how to:
         export MODELS_PATH=/output
         chmod +x /home/dlstreamer/dlstreamer/samples/download_public_models.sh
 
-        if [ ! -e "src/dlstreamer-pipeline-server/models/public/yolo11s/INT8/yolo11s.xml" ]; then
+        if [ ! -e "src/dlstreamer-pipeline-server/models/public/yolo11s/FP16/yolo11s.xml" ]; then
           for attempt in 1 2 3; do
             
             if /home/dlstreamer/dlstreamer/samples/download_public_models.sh yolo11s coco128; then
