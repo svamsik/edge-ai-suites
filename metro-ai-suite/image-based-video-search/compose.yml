@@ -95,7 +95,7 @@ services:
         wget -O file.mp4 https://github.com/intel-iot-devkit/sample-videos/raw/master/person-bicycle-car-detection.mp4 && \
         unset http_proxy https_proxy no_proxy HTTP_PROXY HTTPS_PROXY NO_PROXY && \
         gst-launch-1.0 filesrc location=file.mp4 ! qtdemux name=mdemux ! h264parse ! video/x-h264,stream-format=byte-stream ! mpegtsmux name=mux ! filesink location=file.ts && \
-        gst-launch-1.0 multifilesrc location=file.ts loop=true ! tsdemux ! h264parse ! rtspclientsink protocols=tcp location=rtsp://rtsp-server:8554/stream
+        ffmpeg -re -stream_loop -1 -i file.ts -c copy -f mpegts -listen 1 tcp://0.0.0.0:5000
       "
     depends_on:
       rtsp-server:
@@ -134,10 +134,10 @@ services:
     image: ${DLSTREAMER_PIPELINE_SERVER_IMAGE}
     hostname: dlstreamer-pipeline-server
     container_name: ibvs-dlstreamer-pipeline-server
-    read_only: true
+    read_only: false
     security_opt:
       - no-new-privileges
-    privileged: false
+    privileged: true
     tty: true
     entrypoint: ["./run.sh"]
       # - '8554:8554'
@@ -188,6 +188,8 @@ services:
       # - "../mr_models:/home/pipeline-server/mr_models:rw"
       - "./src/dlstreamer-pipeline-server/models/public:/models/public"
       - "./src/dlstreamer-pipeline-server/models/resnet-50-pytorch:/models/resnet-50-pytorch"
+      - "/home/intel/ashish/tmp:/home/pipeline-server/tmp"
+    user: "0"
     group_add:
       # render group ID for ubuntu 20.04 host OS
       - "109"
