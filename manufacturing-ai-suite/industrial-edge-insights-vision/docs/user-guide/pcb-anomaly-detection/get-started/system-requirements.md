@@ -26,7 +26,7 @@ The pallet defect detection model for this sample app has been tested to work on
 
 | Product / Family     | CPU |  iGPU |  NPU | dGPU |
 |----------------------|-----------|------------|-----------|----------|
-| Core Ultra Series (3,2,1), 14th, 13th and 12th Gen  | ✓         | ✓          | ✓         |          |
+| Core Ultra (3,2,1), Core Series, 14th, 13th and 12th Gen  | ✓         | ✓          | ✓         |          |  
 | Xeon(R) Platinum 8468V                 | ✓         |            |           | Intel(R) Arc(TM) A770, B580        |
 
 >NOTE Users can also create apps tailored to their use case using models supported by DLStreamer. 
