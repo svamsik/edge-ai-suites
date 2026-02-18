@@ -21,9 +21,6 @@ The overall infrastructure involves ingesting an RTSP stream, processing it thro
 
 For more information see [How it works](./docs/user-guide/how-it-works.md)
 
-## Learn More
-
-•	[Release Notes](./docs/user-guide/release-notes.md)
 
 ## Learn More
 
