@@ -31,7 +31,6 @@ graph TD
 ## Learn More
 
   - [Architecture](docs/user-guide/overview-architecture-live-video-search.md): End‑to‑end architecture.
-  - [Get Started](docs/user-guide/get-started.md): Step‑by‑step setup.
   - [System Requirements](docs/user-guide/system-requirements.md): Hardware and software requirements.
   - [Build from Source](docs/user-guide/how-to-build-from-source.md): Build images for the stack.
   - [API Reference](docs/user-guide/api-reference.md): Key endpoints and references.
