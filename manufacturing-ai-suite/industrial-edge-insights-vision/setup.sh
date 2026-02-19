@@ -271,9 +271,10 @@ get_env_value() {
 update_env_file() {
     # check if the .env file exists, if not create it
     # and update it with values from the arg listed in VARS_TO_EXPORT
-    
-    : "${ENV_PATH:=$SCRIPT_DIR}"
-    [[ -n "$YAML_FILE" && -f "$YAML_FILE" ]] || YAML_FILE="$SCRIPT_DIR/helm/values.yaml"
+    # Extract nginx ports from values.yaml and update the .env file accordingly
+    if [[ ! -f "$ENV_PATH/.env" ]]; then
+        touch "$ENV_PATH/.env"
+    fi
 
     nginx_https_port=$(awk '
         BEGIN { in_config=0; in_nginx=0; in_ext=0 }
@@ -295,7 +296,7 @@ update_env_file() {
     ' "$YAML_FILE")
 
     if [[ -n "$nginx_https_port" ]]; then
-        if grep -q "^NGINX_HTTPS_PORT=" "$ENV_PATH/.env" 2>/dev/null; then
+        if grep -q "^NGINX_HTTPS_PORT=" "$ENV_PATH/.env"; then
             sed -i "s/^NGINX_HTTPS_PORT=.*/NGINX_HTTPS_PORT=$nginx_https_port/" "$ENV_PATH/.env"
         else
             echo "NGINX_HTTPS_PORT=$nginx_https_port" >> "$ENV_PATH/.env"
@@ -325,7 +326,7 @@ update_env_file() {
     ' "$YAML_FILE")
 
     if [[ -n "$nginx_http_port" ]]; then
-        if grep -q "^NGINX_HTTP_PORT=" "$ENV_PATH/.env" 2>/dev/null; then
+        if grep -q "^NGINX_HTTP_PORT=" "$ENV_PATH/.env"; then
             sed -i "s/^NGINX_HTTP_PORT=.*/NGINX_HTTP_PORT=$nginx_http_port/" "$ENV_PATH/.env"
         else
             echo "NGINX_HTTP_PORT=$nginx_http_port" >> "$ENV_PATH/.env"
@@ -335,9 +336,6 @@ update_env_file() {
         echo "Variable NGINX_HTTP_PORT not found in YAML (config.nginx.ext.http_port)"
     fi
 
-    if [[ ! -f "$ENV_PATH/.env" ]]; then
-        touch "$ENV_PATH/.env"
-    fi
     # loop through the variables to export
     for var in "${VARS_TO_EXPORT[@]}"; do
         value=$(get_env_value "$var")
@@ -431,10 +429,10 @@ init_instance_helm() {
     ENV_PATH="$TEMP_APP_DIR"
     YAML_FILE="$TEMP_APP_DIR/values.yaml"
     
-    # First, update values.yaml with instance-specific ENV_VARS from config.yml
+    # Update values.yaml with instance-specific ENV_VARS from config.yml
     update_values_yaml_from_config "$ENV_VARS" "$TEMP_APP_DIR/values.yaml" "$INSTANCE_NAME"
     
-    # Then, extract and export environment variables from the updated values.yaml
+    # Extract and export environment variables from the updated values.yaml
     for var in "${VARS_TO_EXPORT[@]}"; do
         value=$(get_env_value "$var")
         if [[ -n "$value" ]]; then
