@@ -17,7 +17,7 @@ This page provides detailed hardware, software, and platform requirements to hel
 
 | **Component**      | **Minimum Requirement**   | **Recommended**         |
 |---------------------|---------------------------|--------------------------|
-| **Processor**       | 12th Generation Intel® Core™ processor and above with Intel® HD Graphics   | Intel® Core™ Ultra Processors (Series 2) also known as Arrow Lake |
+| **Processor**       | 12th Generation Intel® Core™ processor and above with Intel® HD Graphics, 4th Gen Intel® Xeon® Scalable Processors   | Intel® Core™ Ultra Processors (Series 2) also known as Arrow Lake, 4th Gen Intel® Xeon® Scalable Processors |
 | **Memory**          | 16 GB                     | 16 GB                   |
 | **Disk Space**      | 64 GB                | 128 GB               |
 
@@ -26,7 +26,7 @@ The pallet defect detection model for this sample app has been tested to work on
 
 | Product / Family     | CPU |  iGPU |  NPU | dGPU |
 |----------------------|-----------|------------|-----------|----------|
-| Core Ultra (3,2,1), Core Series, 14th, 13th and 12th Gen  | ✓         | ✓          | ✓         |  Intel(R) Arc(TM) A770, B580        |  
+| Intel® Core™ Ultra Processors (Series 3, 2, 1), Intel® Core™ Processors Series 2, Intel® Core™ Processors (14th/13th/12th Gen)  | ✓         | ✓          | ✓         |  Intel(R) Arc(TM) A770, B580        |  
 | 4th Gen Intel® Xeon® Scalable Processors                 | ✓         |            |           | Intel(R) Arc(TM) A770, B580        |
 
 >NOTE Users can also create apps tailored to their use case using models supported by DLStreamer. 
