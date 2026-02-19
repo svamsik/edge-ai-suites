@@ -46,6 +46,6 @@ Click [here](https://docs.openedgeplatform.intel.com/dev/edge-ai-libraries/dlstr
 
 ## Supporting Resources
 
-- [Overview](./index.md)
-- [Get Started Guide](./get-started.md)
-- [API Reference](./api-reference.md)
+- [Overview](../index.md)
+- [Get Started Guide](../get-started.md)
+- [API Reference](../api-reference.md)
