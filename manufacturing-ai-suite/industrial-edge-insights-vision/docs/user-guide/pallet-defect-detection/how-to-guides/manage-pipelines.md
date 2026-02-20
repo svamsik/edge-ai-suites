@@ -37,7 +37,9 @@ Customize the pipeline according to your needs. For details, see the following D
 - [Autostart pipelines](https://docs.openedgeplatform.intel.com/dev/edge-ai-libraries/dlstreamer-pipeline-server/how-to-autostart-pipelines.html)
 
 ## Start the Pipeline
->If you're running multiple instances of app, ensure to provide `NGINX_HTTPS_PORT` number in the url for the app instance i.e. replace `<HOST_IP>` with `<HOST_IP>:<NGINX_HTTPS_PORT>`
+>Note: If you're running multiple instances of app, ensure to provide `NGINX_HTTPS_PORT` number in the url for the app instance i.e. replace `<HOST_IP>` with `<HOST_IP>:<NGINX_HTTPS_PORT>`
+>If you're running a single instance and using an NGINX_HTTPS_PORT other than the default 443, replace `<HOST_IP>` with `<HOST_IP>:<NGINX_HTTPS_PORT>`.
+
 Follow this procedure to start the pipeline.
 
 1. In the `pipeline-server-config.json` file, identify the name of the pipeline you want to start.
