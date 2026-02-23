@@ -242,11 +242,11 @@ gen_helm_charts:
 push_helm_charts: gen_helm_charts
 	@echo "Packaging Helm chart for ${SAMPLE_APP}"
 	@mkdir -p helm-packages
-	helm package helm/ -d helm-packages/
-	@echo "Helm chart packaged successfully in helm-packages/"
-	@cd helm-packages && helm push *.tgz $(HELM_REGISTRY) && cd ..
-	@echo "Helm chart packages pushed successfully to $(HELM_REGISTRY)"
-
+	@rm -f helm-packages/*.tgz
+	@pkg_file=$$(helm package helm/ -d helm-packages/ | awk '{print $$NF}'); \
+	echo "Helm chart packaged successfully: $$pkg_file"; \
+	helm push $$pkg_file $(HELM_REGISTRY) && echo "Helm chart package pushed successfully to $(HELM_REGISTRY)"; \
+	cd ..
 # Help
 .PHONY: help
 help:

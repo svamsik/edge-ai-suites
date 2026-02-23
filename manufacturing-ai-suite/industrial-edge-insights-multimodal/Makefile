@@ -5,7 +5,7 @@
 #
 
 INCLUDE ?= default_INCLUDE
-HELM_REGISTRY := oci://registry-1.docker.io/intel
+HELM_REGISTRY = oci://registry-1.docker.io/intel
 
 DOCKER_COMPOSE_FILE = ./docker-compose.yml
 DOCKER_COMPOSE_VALIDATION_FILE=./docker-compose-validation.override.yml
@@ -36,7 +36,7 @@ build:
 .PHONY: build_copyleft_sources
 build_copyleft_sources:
 	@echo "Building Docker containers including copyleft licensed sources..."
-	$(DOCKER_COMPOSE) build --build-arg COPYLEFT_SOURCES=true -pull;
+	$(DOCKER_COMPOSE) build --build-arg COPYLEFT_SOURCES=true --pull;
 
 .PHONY: validate_host_ip
 validate_host_ip:
@@ -216,10 +216,11 @@ gen_helm_charts:
 .PHONY: push_helm_charts
 push_helm_charts: gen_helm_charts
 	@mkdir -p helm-packages
-	helm package helm/ -d helm-packages/
-	@echo "Helm chart packaged successfully in helm-packages/"
-	@cd helm-packages && helm push *.tgz $(HELM_REGISTRY) && cd ..
-	@echo "Helm chart packages pushed successfully to $(HELM_REGISTRY)"
+	@rm -f helm-packages/*.tgz
+	@pkg_file=$$(helm package helm/ -d helm-packages/ | awk '{print $$NF}'); \
+	echo "Helm chart packaged successfully: $$pkg_file"; \
+	helm push $$pkg_file $(HELM_REGISTRY) && echo "Helm chart package pushed successfully to $(HELM_REGISTRY)"; \
+	cd ..
 
 # Help
 .PHONY: help
