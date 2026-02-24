@@ -38,7 +38,7 @@ const TopPanel = () => {
       
       if (response.status === 'ok') {
         setNotification('✅ Workloads started successfully'); // REMOVE auto-stop message
-        // Schedule automatic stop after 15 minutes
+        // Schedule automatic stop after 10 minutes
         if (autoStopTimeoutRef.current) {
           clearTimeout(autoStopTimeoutRef.current);
         }
@@ -46,7 +46,7 @@ const TopPanel = () => {
           autoStopTimeoutRef.current = null;
           // Force stop even if local isProcessing flag is stale
           handleStop(true);
-        }, 15 * 60 * 1000);
+        }, 10 * 60 * 1000);
         
         const eventsUrl = api.getEventsUrl(['rppg', 'ai-ecg', 'mdpnp', '3d-pose']);
         dispatch({ type: 'sse/connect', payload: { url: eventsUrl } });
