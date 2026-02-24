@@ -25,15 +25,14 @@ def ensure_model() -> None:
     Model name/type/hub come from model-config.yaml (rppg section).
     """
     MODELS_ROOT.mkdir(parents=True, exist_ok=True)
-    xml_path = MODELS_ROOT / "mtts_can.xml"
-    bin_path = MODELS_ROOT / "mtts_can.bin"
-    hdf5_path = MODELS_ROOT / "mtts_can.hdf5"
 
     def _present(p: pathlib.Path) -> bool:
         return p.exists() and p.stat().st_size > 0
 
-    # If XML and BIN already exist at final location, nothing to do
-    if _present(xml_path) and _present(bin_path):
+    # If any XML+BIN already exist at final location, nothing to do
+    existing_xml = list(MODELS_ROOT.glob("*.xml"))
+    existing_bin = list(MODELS_ROOT.glob("*.bin"))
+    if existing_xml and existing_bin:
         return
 
     config_path = pathlib.Path("/configs/model-config.yaml")
@@ -65,25 +64,46 @@ def ensure_model() -> None:
 
     # Model-download service writes under hls_assets/rppg inside the shared models volume
     hls_dir = pathlib.Path(os.getenv("MODELS_ROOT", "/models")) / "hls_assets" / "rppg"
-    hls_xml_path = hls_dir / "mtts_can.xml"
-    hls_bin_path = hls_dir / "mtts_can.bin"
-    hls_hdf5_path = hls_dir / "mtts_can.hdf5"
 
-    timeout = 500
+    def _present_any(paths):
+        return any(p.exists() and p.stat().st_size > 0 for p in paths)
+
+    timeout = int(os.getenv("MODEL_WAIT_TIMEOUT", "1200"))
     elapsed = 0
-    while (not _present(hls_xml_path) or not _present(hls_bin_path)) and elapsed < timeout:
+    hls_xml_paths = []
+    hls_bin_paths = []
+    hls_hdf5_paths = []
+
+    while elapsed < timeout:
+        hls_xml_paths = list(hls_dir.glob("*.xml"))
+        hls_bin_paths = list(hls_dir.glob("*.bin"))
+        hls_hdf5_paths = list(hls_dir.glob("*.hdf5"))
+
+        if _present_any(hls_xml_paths) and _present_any(hls_bin_paths):
+            break
+
         print(f"[rppg] Waiting for model in {hls_dir}... ({elapsed}/{timeout}s)")
         time.sleep(5)
         elapsed += 5
 
-    if not _present(hls_xml_path) or not _present(hls_bin_path):
+    if not _present_any(hls_xml_paths) or not _present_any(hls_bin_paths):
         raise RuntimeError("RPPG model did not appear within timeout in hls_assets")
 
-    # Copy IR (XML+BIN) and original HDF5 into the service-specific models directory
-    shutil.copy2(hls_xml_path, xml_path)
-    shutil.copy2(hls_bin_path, bin_path)
-    if _present(hls_hdf5_path):
-        shutil.copy2(hls_hdf5_path, hdf5_path)
+    # Copy all discovered IR (XML+BIN) and original HDF5 into the service-specific models directory
+    for src_xml in hls_xml_paths:
+        if src_xml.exists() and src_xml.stat().st_size > 0:
+            dst_xml = MODELS_ROOT / src_xml.name
+            shutil.copy2(src_xml, dst_xml)
+
+    for src_bin in hls_bin_paths:
+        if src_bin.exists() and src_bin.stat().st_size > 0:
+            dst_bin = MODELS_ROOT / src_bin.name
+            shutil.copy2(src_bin, dst_bin)
+
+    for src_hdf5 in hls_hdf5_paths:
+        if src_hdf5.exists() and src_hdf5.stat().st_size > 0:
+            dst_hdf5 = MODELS_ROOT / src_hdf5.name
+            shutil.copy2(src_hdf5, dst_hdf5)
 
 
 def ensure_video() -> None:
@@ -95,8 +115,8 @@ def ensure_video() -> None:
 
 def validate_assets() -> None:
     """Final sanity check: required RPPG model and video must exist."""
-    xml_path = MODELS_ROOT / "mtts_can.xml"
-    bin_path = MODELS_ROOT / "mtts_can.bin"
+    xml_paths = list(MODELS_ROOT.glob("*.xml"))
+    bin_paths = list(MODELS_ROOT.glob("*.bin"))
     video_path = VIDEOS_ROOT / VIDEO_NAME
 
     def _present(p: pathlib.Path) -> bool:
@@ -104,11 +124,12 @@ def validate_assets() -> None:
 
     missing = [
         str(p)
-        for p in (xml_path, bin_path, video_path)
+        for p in (xml_paths + bin_paths + [video_path])
         if not _present(p)
     ]
-    if missing:
-        raise RuntimeError(f"RPPG assets missing after download: {missing}")
+    # Require at least one XML and one BIN file, all non-empty, plus the video
+    if not xml_paths or not bin_paths or missing:
+        raise RuntimeError(f"RPPG assets missing after download: {missing or 'no XML/BIN files found'}")
 
     print("[rppg] Model and demo video are present.")
 

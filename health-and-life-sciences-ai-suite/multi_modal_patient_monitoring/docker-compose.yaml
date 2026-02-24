@@ -133,6 +133,7 @@ services:
       - ZE_ENABLE_ALT_DRIVERS=libze_intel_npu.so   
       - AI_ECG_PORT=${AI_ECG_PORT:-8101}
       - MODEL_DOWNLOAD_URL=http://localhost:${MODEL_DOWNLOAD_PORT:-8000}
+      - MODEL_WAIT_TIMEOUT=${MODEL_WAIT_TIMEOUT:-1200}
     env_file:
       - ./configs/device.env  
     volumes:
@@ -175,6 +176,7 @@ services:
         - CONTROL_PORT=8083     
         - ZE_ENABLE_ALT_DRIVERS=libze_intel_npu.so  
         - MODEL_DOWNLOAD_URL=http://localhost:${MODEL_DOWNLOAD_PORT:-8000}
+        - MODEL_WAIT_TIMEOUT=${MODEL_WAIT_TIMEOUT:-1200}
       env_file:
         - ./configs/device.env
       depends_on:
@@ -219,6 +221,7 @@ services:
       - RPPG_DEVICE=${RPPG_DEVICE}  
       - ZE_ENABLE_ALT_DRIVERS=libze_intel_npu.so    
       - MODEL_DOWNLOAD_URL=http://localhost:${MODEL_DOWNLOAD_PORT:-8000}
+      - MODEL_WAIT_TIMEOUT=${MODEL_WAIT_TIMEOUT:-1200}
     env_file:
       - ./configs/device.env  
     volumes:

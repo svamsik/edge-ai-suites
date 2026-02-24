@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 class InferenceEngine:
     """MTTS-CAN inference engine using OpenVINO IR."""
 
-    def __init__(self, model_path: str = "/models/rppg/mtts_can.xml", batch_size: int = 10):
+    def __init__(self, model_path: str | None = None, batch_size: int = 10):
         """Initialize inference engine.
 
         The model is expected to be an OpenVINO IR (XML) file. Device
@@ -30,7 +30,15 @@ class InferenceEngine:
         reshaped to a concrete value to satisfy the compiler/runtime.
         """
 
-        self.model_path = Path(model_path)
+        # If no explicit model_path given, auto-discover any XML under MODELS_ROOT
+        if model_path is None:
+            models_root = Path(os.getenv("MODELS_ROOT", "/models")) / "rppg"
+            candidates = sorted(models_root.glob("*.xml"))
+            if not candidates:
+                raise FileNotFoundError(f"No OpenVINO IR XML model found under {models_root}")
+            self.model_path = candidates[0]
+        else:
+            self.model_path = Path(model_path)
         if not self.model_path.exists():
             raise FileNotFoundError(f"OpenVINO IR model not found: {self.model_path}")
 

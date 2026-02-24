@@ -52,8 +52,11 @@ class RPPGService:
         
         # Pass batch_size so the inference engine can fix dynamic
         # batch dimensions for NPU compilation when needed.
+        # If model.path is omitted or empty, InferenceEngine will
+        # auto-discover an XML model under /models/rppg.
+        model_path = self.config['model'].get('path') or None
         self.inference = InferenceEngine(
-            model_path=self.config['model']['path'],
+            model_path=model_path,
             batch_size=self.config['model']['batch_size'],
         )
         

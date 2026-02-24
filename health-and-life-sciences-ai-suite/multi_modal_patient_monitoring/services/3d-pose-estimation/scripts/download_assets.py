@@ -26,14 +26,13 @@ def ensure_model() -> None:
     """
     MODELS_ROOT.mkdir(parents=True, exist_ok=True)
 
-    xml_path = MODELS_ROOT / "human-pose-estimation-3d-0001.xml"
-    bin_path = MODELS_ROOT / "human-pose-estimation-3d-0001.bin"
-
     def _present(p: pathlib.Path) -> bool:
         return p.exists() and p.stat().st_size > 0
 
-    # If both XML and BIN already exist at final location, nothing to do
-    if _present(xml_path) and _present(bin_path):
+    # If any XML and BIN already exist at final location, nothing to do
+    existing_xml = list(MODELS_ROOT.glob("*.xml"))
+    existing_bin = list(MODELS_ROOT.glob("*.bin"))
+    if existing_xml and existing_bin:
         return
 
     config_path = pathlib.Path("/configs/model-config.yaml")
@@ -65,22 +64,36 @@ def ensure_model() -> None:
 
     # Model-download service writes under hls_assets/3d-pose inside the shared models volume
     hls_dir = pathlib.Path(os.getenv("MODELS_ROOT", "/models")) / "hls_assets" / "3d-pose"
-    hls_xml_path = hls_dir / "human-pose-estimation-3d-0001.xml"
-    hls_bin_path = hls_dir / "human-pose-estimation-3d-0001.bin"
 
-    timeout = 500
+    timeout = int(os.getenv("MODEL_WAIT_TIMEOUT", "1200"))
     elapsed = 0
-    while (not _present(hls_xml_path) or not _present(hls_bin_path)) and elapsed < timeout:
+    hls_xml_paths = []
+    hls_bin_paths = []
+
+    while elapsed < timeout:
+        hls_xml_paths = list(hls_dir.glob("*.xml"))
+        hls_bin_paths = list(hls_dir.glob("*.bin"))
+
+        if hls_xml_paths and hls_bin_paths:
+            break
+
         print(f"[3d-pose] Waiting for model in {hls_dir}... ({elapsed}/{timeout}s)")
         time.sleep(5)
         elapsed += 5
 
-    if not _present(hls_xml_path) or not _present(hls_bin_path):
+    if not hls_xml_paths or not hls_bin_paths:
         raise RuntimeError("3D pose model did not appear within timeout in hls_assets")
 
-    # Copy from hls_assets into the service-specific models directory (XML + BIN)
-    shutil.copy2(hls_xml_path, xml_path)
-    shutil.copy2(hls_bin_path, bin_path)
+    # Copy all discovered IR (XML+BIN) into the service-specific models directory
+    for src_xml in hls_xml_paths:
+        if src_xml.exists() and src_xml.stat().st_size > 0:
+            dst_xml = MODELS_ROOT / src_xml.name
+            shutil.copy2(src_xml, dst_xml)
+
+    for src_bin in hls_bin_paths:
+        if src_bin.exists() and src_bin.stat().st_size > 0:
+            dst_bin = MODELS_ROOT / src_bin.name
+            shutil.copy2(src_bin, dst_bin)
 
 
 def ensure_video() -> None:
@@ -92,8 +105,8 @@ def ensure_video() -> None:
 
 def validate_assets() -> None:
     """Final sanity check: required 3D pose model and video must exist."""
-    xml_path = MODELS_ROOT / "human-pose-estimation-3d-0001.xml"
-    bin_path = MODELS_ROOT / "human-pose-estimation-3d-0001.bin"
+    xml_paths = list(MODELS_ROOT.glob("*.xml"))
+    bin_paths = list(MODELS_ROOT.glob("*.bin"))
     video_path = VIDEOS_ROOT / VIDEO_NAME
 
     def _present(p: pathlib.Path) -> bool:
@@ -101,11 +114,12 @@ def validate_assets() -> None:
 
     missing = [
         str(p)
-        for p in (xml_path, bin_path, video_path)
+        for p in (xml_paths + bin_paths + [video_path])
         if not _present(p)
     ]
-    if missing:
-        raise RuntimeError(f"3D pose assets missing after download: {missing}")
+    # Require at least one XML and one BIN file, all non-empty, plus the video
+    if not xml_paths or not bin_paths or missing:
+        raise RuntimeError(f"3D pose assets missing after download: {missing or 'no XML/BIN files found'}")
 
     print("[3d-pose] Model and demo video are present.")
 
