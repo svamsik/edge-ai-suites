@@ -44,13 +44,17 @@ RUN cd proto && \
 # Copy application source files (relative to build context)
 COPY src/*.py ./
 
+# Copy asset download scripts
+COPY scripts/ ./scripts/
+
 ENV PYTHONPATH="${PYTHONPATH}:/app:/app/proto"
 
 EXPOSE 8083 8085
 
 # Remove --device-config argument since app.py no longer supports it
-CMD python app.py \
+# Ensure models and demo video are downloaded before starting the app
+CMD sh -c "python scripts/download_assets.py && python app.py \
     --model ${MODEL_PATH} \
     --video ${VIDEO_FILE} \
     --aggregator ${AGGREGATOR_ADDRESS} \
-    --source-id ${SOURCE_ID}
+    --source-id ${SOURCE_ID}"

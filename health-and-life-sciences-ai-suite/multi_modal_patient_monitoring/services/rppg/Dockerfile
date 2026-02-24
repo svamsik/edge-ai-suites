@@ -59,6 +59,9 @@ COPY proto/ ./proto/
 COPY src/ ./src/
 COPY config.yaml .
 
+# Copy asset download scripts
+COPY scripts/ ./scripts/
+
 # Copy pre-downloaded assets (if present) into the image
 #COPY models/ ./models/
 #COPY videos/ ./videos/
@@ -70,7 +73,5 @@ ENV PYTHONPATH=/app
 
 EXPOSE 5004
 
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD python -c "import grpc; channel = grpc.insecure_channel('localhost:5004'); channel.close()" || exit 1
-
-CMD ["python", "-m", "src.app"]
+# Ensure models and demo video are downloaded before starting the app
+CMD ["sh", "-c", "python scripts/download_assets.py && python -m src.app"]

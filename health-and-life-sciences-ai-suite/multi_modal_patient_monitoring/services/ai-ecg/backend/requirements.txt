@@ -4,3 +4,4 @@ numpy
 scipy
 openvino
 python-multipart
+pyyaml>=6.0.0

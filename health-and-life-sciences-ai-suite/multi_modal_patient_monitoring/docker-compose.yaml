@@ -3,20 +3,29 @@
 
 
 services:
-  patient-monitoring-assets:
-    build:
-      context: ./services/patient-monitoring-assets
-      dockerfile: Dockerfile
-      args:
-        HTTP_PROXY: ${HTTP_PROXY}
-        HTTPS_PROXY: ${HTTPS_PROXY}
-        NO_PROXY: ${NO_PROXY}
-    image: intel/hl-ai-patient-monitoring-assets:${TAG:-1.0.1}
-    container_name: patient-monitoring-assets
+  model_download_service:
+    image: intel/model-download:rc4_2026.0 
+    container_name: model-download
+    user: "0:0"
+    environment:
+      - MODEL_PATH=/opt/models
+      - MODEL_DOWNLOAD_PORT=${MODEL_DOWNLOAD_PORT:-8000}
+      - OVMS_RELEASE_TAG=${OVMS_RELEASE_TAG:-v2025.4.1}
+      - HLS_3D_POSE_CHECKPOINT_URL=${HLS_3D_POSE_CHECKPOINT_URL:-https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/human-pose-estimation-3d-0001/human-pose-estimation-3d.tar.gz}
+      - HLS_ECG_BASE_URL=${HLS_ECG_BASE_URL:-https://raw.githubusercontent.com/Einse57/OpenVINO_sample/master/ai-ecg-master}
+      - HLS_RPPG_MODEL_URL=${HLS_RPPG_MODEL_URL:-https://github.com/xliucs/MTTS-CAN/raw/main/mtts_can.hdf5}
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/health || exit 1"]
+      interval: 60s
+      timeout: 10s
+      retries: 5
+      start_period: 180s
+    network_mode: "host"  
     volumes:
-      - ./models:/models
+      - ./models:/opt/models
       - ./videos:/videos
-  
+
+
   patient-monitoring-aggregator:
     build:
       context: ./services/patient-monitoring-aggregator
@@ -31,6 +40,8 @@ services:
       - WORKLOAD_TYPE=mdpnp
       - GRPC_PORT=50051
       - HTTP_PORT=8000    
+      - AI_ECG_PORT=${AI_ECG_PORT:-8101}
+      - AI_ECG_URL=http://localhost:${AI_ECG_PORT:-8101}/predict_stream_next
     network_mode: "host"
     
   metrics-collector:
@@ -73,8 +84,6 @@ services:
     container_name: mdpnp
     network_mode: "host"
     depends_on:
-        patient-monitoring-assets:
-          condition: service_completed_successfully
         patient-monitoring-aggregator:
           condition: service_started  
 
@@ -99,7 +108,7 @@ services:
         condition: service_started
       mdpnp:
         condition: service_started
-    network_mode: "host"
+    network_mode: "host" 
 
   ai-ecg:
     build:
@@ -113,24 +122,34 @@ services:
     image: intel/hl-ai-ecg:${TAG:-1.0.1}
     container_name: ai-ecg
     network_mode: "host"
+    restart: on-failure
     depends_on:
-      patient-monitoring-assets:
-        condition: service_completed_successfully
+      model_download_service:
+        condition: service_healthy
       patient-monitoring-aggregator:
         condition: service_started
     environment:
       - ECG_DEVICE=${ECG_DEVICE}  
       - ZE_ENABLE_ALT_DRIVERS=libze_intel_npu.so   
+      - AI_ECG_PORT=${AI_ECG_PORT:-8101}
+      - MODEL_DOWNLOAD_URL=http://localhost:${MODEL_DOWNLOAD_PORT:-8000}
     env_file:
       - ./configs/device.env  
     volumes:
       - ./models:/models
       - ./videos:/videos
+      - ./configs:/configs
     devices:
       - "/dev/dri:/dev/dri"
       - "/dev/accel/accel0:/dev/accel/accel0" 
     group_add:
       - video
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:${AI_ECG_PORT:-8101}/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 600s
 
   3dpose-estimation:
       build:
@@ -144,6 +163,7 @@ services:
       image: intel/hl-ai-3dpose:${TAG:-1.0.1}
       container_name: 3dpose-estimation
       network_mode: "host"
+      restart: on-failure
       environment:
         - VIDEO_FILE=/videos/3d-pose/face-demographics-walking.mp4
         - MODEL_PATH=/models/3d-pose/human-pose-estimation-3d-0001.xml
@@ -154,21 +174,29 @@ services:
         - POSE_3D_DEVICE=${POSE_3D_DEVICE:-GPU}
         - CONTROL_PORT=8083     
         - ZE_ENABLE_ALT_DRIVERS=libze_intel_npu.so  
+        - MODEL_DOWNLOAD_URL=http://localhost:${MODEL_DOWNLOAD_PORT:-8000}
       env_file:
         - ./configs/device.env
       depends_on:
-        patient-monitoring-assets:
-          condition: service_completed_successfully
+        model_download_service:
+          condition: service_healthy
         patient-monitoring-aggregator:
           condition: service_started
       volumes:
         - ./models:/models
         - ./videos:/videos 
+        - ./configs:/configs
       devices:
         - "/dev/dri:/dev/dri"
         - "/dev/accel/accel0:/dev/accel/accel0" 
       group_add:
         - video
+      healthcheck:
+        test: ["CMD-SHELL", "curl -f http://localhost:${CONTROL_PORT:-8083}/status || exit 1"]
+        interval: 30s
+        timeout: 10s
+        retries: 3
+        start_period: 600s
   
   rppg:
     build:
@@ -181,24 +209,33 @@ services:
     image: intel/hl-ai-rppg:${TAG:-1.0.1}
     container_name: rppg
     network_mode: "host"
+    restart: on-failure
     depends_on:
-      patient-monitoring-assets:
-        condition: service_completed_successfully
+      model_download_service:
+        condition: service_healthy
       patient-monitoring-aggregator:
           condition: service_started  
     environment:
       - RPPG_DEVICE=${RPPG_DEVICE}  
       - ZE_ENABLE_ALT_DRIVERS=libze_intel_npu.so    
+      - MODEL_DOWNLOAD_URL=http://localhost:${MODEL_DOWNLOAD_PORT:-8000}
     env_file:
       - ./configs/device.env  
     volumes:
       - ./models:/models
       - ./videos:/videos
+      - ./configs:/configs
     devices:
       - "/dev/dri:/dev/dri" 
       - "/dev/accel/accel0:/dev/accel/accel0" 
     group_add:
       - video      
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8084/status || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 600s
    
   ui:
     build:
@@ -214,14 +251,14 @@ services:
       - "3000:3000"
     depends_on:
       patient-monitoring-aggregator:
-        condition: service_started
-      mdpnp:
-        condition: service_started
-      dds-bridge:
-        condition: service_started
+        condition: service_started     
       ai-ecg:
-        condition: service_started
+        condition: service_healthy
       3dpose-estimation:
-        condition: service_started
+        condition: service_healthy
       rppg:
-        condition: service_started    
+        condition: service_healthy       
+
+  
+
+

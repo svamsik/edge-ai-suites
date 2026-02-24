@@ -52,15 +52,12 @@ COPY . .
 
 ENV PYTHONPATH=/app
 
-EXPOSE 8000
+# Default AI-ECG service port (can be overridden via AI_ECG_PORT)
+ENV AI_ECG_PORT=8101
+
+EXPOSE 8101
 
 # ----------------------------------------------------------------------------
-# Healthcheck
+# Run app - ensure models are downloaded first; port driven by AI_ECG_PORT
 # ----------------------------------------------------------------------------
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:8000/health || exit 1
-
-# ----------------------------------------------------------------------------
-# Run app
-# ----------------------------------------------------------------------------
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["sh", "-c", "python scripts/download_assets.py && uvicorn app:app --host 0.0.0.0 --port ${AI_ECG_PORT:-8101}"]

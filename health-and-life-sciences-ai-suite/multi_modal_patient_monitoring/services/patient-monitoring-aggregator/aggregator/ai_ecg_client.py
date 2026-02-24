@@ -7,7 +7,7 @@ from proto import vital_pb2, vital_pb2_grpc
 
 AI_ECG_URL = os.getenv(
     "AI_ECG_URL",
-    "http://localhost:8000/predict_stream_next"
+    "http://localhost:8101/predict_stream_next"
 )
 AGGREGATOR_GRPC = os.getenv(
     "AGGREGATOR_GRPC",
