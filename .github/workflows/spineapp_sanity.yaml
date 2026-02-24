@@ -33,16 +33,17 @@ jobs:
         INPUT_BRANCH: ${{ inputs.branch }}
         EVENT_INPUTS_BRANCH: ${{ github.event.inputs.branch }}
         REF_NAME: ${{ github.ref_name }}
+        EVENT_NAME: ${{ github.event_name }}
       run: |
         if [ -n "$INPUT_BRANCH" ]; then
           echo "branch=$INPUT_BRANCH" >> $GITHUB_OUTPUT
-        elif [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+        elif [ "$EVENT_NAME" == "workflow_dispatch" ]; then
           echo "branch=$EVENT_INPUTS_BRANCH" >> $GITHUB_OUTPUT
         else
           echo "branch=$REF_NAME" >> $GITHUB_OUTPUT
         fi
     - name: Check out edge-ai-suites repository
-      uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
       with:
         persist-credentials: false
         path: edge-ai-suites-repo
@@ -79,7 +80,7 @@ jobs:
        echo "- ✅ Passed: $passed" >> $GITHUB_STEP_SUMMARY
        echo "- ❌ Failed: $failed" >> $GITHUB_STEP_SUMMARY
        echo "- ⏭️ Not Run: $not_run" >> $GITHUB_STEP_SUMMARY
-       echo "- 📄 [Full Report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
+       echo "- 📄 [Full Report](https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID)" >> $GITHUB_STEP_SUMMARY
     - name: Upload Scan artifact to Github
       uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f #v6.0.0
       with:
