@@ -1,4 +1,4 @@
-# Copyright (C) 2025 Intel Corporation
+# Copyright (C) 2026 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
 from fastapi import FastAPI, File, UploadFile, HTTPException, Request, Body
@@ -18,8 +18,8 @@ import tempfile
 
 from content_search_minio.minio_client import MinioStore
 
-from video_ingest_and_retrieve.indexer import Indexer
-from video_ingest_and_retrieve.retriever import ChromaRetriever
+from file_ingest_and_retrieve.indexer import Indexer
+from file_ingest_and_retrieve.retriever import ChromaRetriever
 
 logger = logging.getLogger("visual_data_service")
 logging.basicConfig(
@@ -29,6 +29,16 @@ logging.basicConfig(
 )
 console_handler = logging.StreamHandler()
 logger.addHandler(console_handler)
+
+# Suppress noisy third-party loggers
+for _noisy in [
+    "unstructured", "unstructured_inference", "detectron2",
+    "transformers", "urllib3", "httpx", "httpcore",
+    "opentelemetry", "PIL", "chromadb", "llama_index",
+    "multimodal_embedding_serving", "sentence_transformers",
+    "huggingface_hub", "filelock", "optimum", "transformers"
+]:
+    logging.getLogger(_noisy).setLevel(logging.WARNING)
 
 class RetrievalRequest(BaseModel):
     query: Optional[str] = None
@@ -80,7 +90,11 @@ def info():
     """
     try:
         status_info = {
-            "model_name": indexer.model_name,
+            "visual_collection_name": indexer.visual_collection_name,
+            "document_collection_name": indexer.document_collection_name,
+            "visual_db_inited": indexer.visual_db_inited,
+            "document_db_inited": indexer.document_db_inited,
+            "minio_connected": minio_store.client is not None,
         }
         return JSONResponse(content=status_info, status_code=200)
     except Exception as e:
@@ -124,10 +138,15 @@ async def ingest_minio_dir(request: IngestMinioDirRequest = Body(...)):
 
         proc_files = []
         metas = []
+        
+        # TODO: Supported file extensions, verify
+        supported_extensions = ('.jpg', '.png', '.jpeg', '.mp4', '.txt', '.pdf', '.docx', '.doc', 
+                                '.pptx', '.ppt', '.xlsx', '.xls', '.html', '.htm', '.xml', '.md', '.rst')
+        
         with tempfile.TemporaryDirectory() as temp_dir:
             for object_name in store.list_object_names(prefix=folder_path, recursive=True):
-                if not object_name.lower().endswith((".jpg", ".png", ".jpeg", ".mp4")):
-                    logger.debug(f"Unsupported file type: {object_name}, skipped.")
+                if not object_name.lower().endswith(supported_extensions):
+                    logger.warning(f"Unsupported file type: {object_name}, skipped.")
                     continue
 
                 local_file_path = os.path.join(temp_dir, os.path.basename(object_name))
@@ -169,7 +188,7 @@ async def ingest_minio_file(request: IngestMinioFileRequest = Body(...)):
         with tempfile.TemporaryDirectory() as temp_dir:
             local_file_path = os.path.join(temp_dir, os.path.basename(file_path))
             store.get_file(file_path, local_file_path)
-
+            logger.info(f"Successfully downloaded file from MinIO: {local_file_path}")
             meta["file_path"] = f"minio://{bucket_name}/{file_path}"
             res = indexer.add_embedding([local_file_path], [meta], frame_extract_interval=frame_extract_interval, do_detect_and_crop=do_detect_and_crop)
 
@@ -304,6 +323,7 @@ async def retrieval(request: RetrievalRequest):
 
         # Process query or image_base64
         if request.query:
+            # Search in both visual and document collections and merge results, return 2*top_k results
             results = retriever.search(query=request.query, filters=request.filter, top_k=request.max_num_results)
         else:
             try:

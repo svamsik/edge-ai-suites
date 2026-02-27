@@ -1,4 +1,4 @@
-# Copyright (C) 2025 Intel Corporation
+# Copyright (C) 2026 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 # Edit based on: https://github.com/Megvii-BaseDetection/YOLOX/blob/main/demo/OpenVINO/python/openvino_inference.py
 
@@ -11,7 +11,7 @@ import numpy as np
 
 import openvino as ov
 
-from video_ingest_and_retrieve.yolox_utils import preproc, multiclass_nms, demo_postprocess
+from file_ingest_and_retrieve.yolox_utils import preproc, multiclass_nms, demo_postprocess
 
 MODEL_DIR = "./models"
 
