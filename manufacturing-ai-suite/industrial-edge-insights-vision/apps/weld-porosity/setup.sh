@@ -4,7 +4,7 @@
 #   by calling respective app's setup.sh script
 SCRIPT_DIR=$(dirname $(readlink -f "$0"))
 MODEL_URL="https://github.com/open-edge-platform/edge-ai-resources/raw/refs/heads/ashish/int8-weld-model-benchmark/models/INT8/weld_porosity_classification.zip"
-VIDEO_URL="https://github.com/open-edge-platform/edge-ai-resources/raw/refs/heads/ashish/int8-weld-model-benchmark/videos/warehouse.avi"
+VIDEO_URL="https://github.com/open-edge-platform/edge-ai-resources/raw/refs/heads/ashish/int8-weld-model-benchmark/videos/welding.avi"
 
 err() {
     echo "ERROR: $1" >&2
