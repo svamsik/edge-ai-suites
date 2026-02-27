@@ -1,0 +1,64 @@
+---
+# SPDX-FileCopyrightText: (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+name: "[DLStreamer] Audio Detection Sample"
+run-name: "[DLStreamer] Audio Detection Sample (by @${{ github.actor }} via ${{ github.event_name }})"
+
+# Only run at most 1 workflow concurrently per ref, unlimited for branches
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 6 * * 1"  # Every Monday at 6 AM UTC
+
+jobs:
+  run-audio-detect:
+    name: Run DLStreamer Audio Detection Sample
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@8edcb1bdb4e267140fa742c62e395cd74f332709
+        with:
+          persist-credentials: false
+
+      - name: Pull DLStreamer Docker image
+        run: docker pull intel/dlstreamer:latest
+
+      - name: Create models directory
+        run: mkdir -p "$HOME/models"
+
+      - name: Download and convert ACLNet model
+        run: |
+          docker run --rm \
+            -v "$HOME/models:/models" \
+            intel/dlstreamer:latest \
+            bash -c "
+              set -e
+              python3 -m venv /tmp/omz_venv
+              /tmp/omz_venv/bin/pip install --quiet 'openvino-dev[onnx]'
+              /tmp/omz_venv/bin/omz_downloader --name aclnet -o /models
+              /tmp/omz_venv/bin/omz_converter --name aclnet -o /models -d /models
+              echo 'Model download and conversion complete'
+              ls /models/public/aclnet/FP32/
+            "
+
+      - name: Run audio detection sample
+        run: |
+          docker run --rm \
+            -v "$HOME/models:/models" \
+            intel/dlstreamer:latest \
+            bash -c "
+              set -e
+              source /opt/intel/dlstreamer/scripts/setup_dls_env.sh 2>/dev/null || true
+              export MODELS_PATH=/models
+              export AUDIO_MODELS_PATH=/models
+              /opt/intel/dlstreamer/samples/gstreamer/gst_launch/audio_detect/audio_event_detection.sh \
+                /opt/intel/dlstreamer/samples/gstreamer/gst_launch/audio_detect/how_are_you_doing.wav
+            "
