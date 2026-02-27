@@ -219,15 +219,18 @@ services:
       MEDIAMTX_PORT: 8554
       TS_TOPIC: "${TS_TOPIC}"
       RTSP_STREAM_NAME: live.stream
-      no_proxy: "ia-mqtt-broker,ia-time-series-analytics-microservice,mediamtx,${no_proxy}"
-      NO_PROXY: "ia-mqtt-broker,ia-time-series-analytics-microservice,mediamtx,${no_proxy}"
+      no_proxy: "ia-mqtt-broker,ia-time-series-analytics-microservice,mediamtx,${no_proxy},dlstreamer-pipeline-server"
+      NO_PROXY: "ia-mqtt-broker,ia-time-series-analytics-microservice,mediamtx,${no_proxy},dlstreamer-pipeline-server"
       TS_MS_SERVER: "ia-time-series-analytics-microservice"
       TS_MS_PORT: ${KAPACITOR_PORT}
+      DLSPS_SERVER_HOST: dlstreamer-pipeline-server
+      DLSPS_SERVER_PORT: 8080
       CONTINUOUS_SIMULATOR_INGESTION: ${CONTINUOUS_SIMULATOR_INGESTION}
       SIMULATION_TARGET_FPS: ${SIMULATION_TARGET_FPS}
       LOG_LEVEL: ${LOG_LEVEL}
     volumes:
       - ./weld-data-simulator/simulation-data:/simulation-data
+      - ./weld-data-simulator/publisher.py:/publisher.py:ro
     networks:
     - timeseries_network
 
@@ -316,6 +319,8 @@ services:
     depends_on:
       ia-weld-data-simulator:
         condition: service_started
+      ia-time-series-analytics-microservice:
+        condition: service_healthy
       seaweedfs-s3:
         condition: service_started
     environment:
