@@ -43,6 +43,22 @@ profiles:
         displayName: "No proxy"
         type: string
         default: "localhost,127.0.0.1"
+      - name: config.nginx.ext.http_port
+        displayName: "Nginx HTTP NodePort"
+        type: number
+        default: "30080"
+      - name: config.nginx.ext.https_port
+        displayName: "Nginx HTTPS NodePort"
+        type: number
+        default: "30443"
+      - name: config.coturn.ext.coturn_tcp_port
+        displayName: "Coturn TCP NodePort"
+        type: number
+        default: "30386"
+      - name: config.coturn.ext.coturn_udp_port
+        displayName: "Coturn UDP NodePort"
+        type: number
+        default: "30386"
   - name: "with-intel-gpu"
     description: "Uses Intel GPU for inferencing, needs Intel GPU extension"
     valuesFileName: "ld-values-with-intel-gpu.yaml"
@@ -72,6 +88,22 @@ profiles:
         displayName: "No proxy"
         type: string
         default: "localhost,127.0.0.1"
+      - name: config.nginx.ext.http_port
+        displayName: "Nginx HTTP NodePort"
+        type: number
+        default: "30080"
+      - name: config.nginx.ext.https_port
+        displayName: "Nginx HTTPS NodePort"
+        type: number
+        default: "30443"
+      - name: config.coturn.ext.coturn_tcp_port
+        displayName: "Coturn TCP NodePort"
+        type: number
+        default: "30386"
+      - name: config.coturn.ext.coturn_udp_port
+        displayName: "Coturn UDP NodePort"
+        type: number
+        default: "30386"
       - name: gpu.type
         displayName: "GPU type"
         type: string
@@ -109,3 +141,19 @@ profiles:
         displayName: "No proxy"
         type: string
         default: "localhost,127.0.0.1"
+      - name: config.nginx.ext.http_port
+        displayName: "Nginx HTTP NodePort"
+        type: number
+        default: "30080"
+      - name: config.nginx.ext.https_port
+        displayName: "Nginx HTTPS NodePort"
+        type: number
+        default: "30443"
+      - name: config.coturn.ext.coturn_tcp_port
+        displayName: "Coturn TCP NodePort"
+        type: number
+        default: "30386"
+      - name: config.coturn.ext.coturn_udp_port
+        displayName: "Coturn UDP NodePort"
+        type: number
+        default: "30386"
