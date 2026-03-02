@@ -11,7 +11,8 @@ hide_directive-->
 
 # Multi-Modal Patient Monitoring
 
-The Multi-Modal Patient Monitoring application is a reference workload that demonstrates how multiple AI pipelines can run simultaneously on a single Intel® platform, providing
+The Multi-Modal Patient Monitoring application is a reference workload that demonstrates how
+multiple AI pipelines can run simultaneously on a single Intel® platform, providing
 consolidated monitoring for a virtual patient.
 
 It combines several AI services:
@@ -20,14 +21,16 @@ It combines several AI services:
   from facial video.
 - **3D-Pose Estimation:** 3D human pose detection from video.
 - **AI-ECG:** ECG rhythm classification from simulated ECG waveforms.
-- **MDPNP:** Getting metrics of three simulated devices such as ECG, BP and CO2
+- **MDPNP (Medical Device Plug-and-Play):** Getting metrics of three simulated devices such
+  as ECG, BP and CO2
 - **Patient Monitoring Aggregator:** Central service that collects and aggregates vitals from
   all AI workloads.
 - **Metrics Collector:** Gathers hardware and system telemetry (CPU, GPU, NPU, power) from
   the host.
 - **UI:** Web-based dashboard for visualizing waveforms, numeric vitals, and system status.
 
-Together, these components illustrate how vision- and signal-based AI workloads can be orchestrated, monitored, and visualized in a clinical-style scenario.
+Together, these components illustrate how vision- and signal-based AI workloads can be
+orchestrated, monitored, and visualized in a clinical-style scenario.
 
 ## Supporting Resources
 
@@ -37,7 +40,8 @@ Together, these components illustrate how vision- and signal-based AI workloads 
 - [How It Works](./how-it-works.md) – High-level architecture, service responsibilities, and
   data/control flows.
 
-> This application is provided for development and evaluation purposes only and is _not_ intended for clinical or diagnostic use.
+> **Disclaimer:** This application is provided for development and evaluation purposes only and is _not_
+intended for clinical or diagnostic use.
 
 <!--hide_directive
 :::{toctree}
@@ -45,7 +49,6 @@ Together, these components illustrate how vision- and signal-based AI workloads 
 
 get-started.md
 how-it-works.md
-run-multi-modal-app.md
 release-notes.md
 
 :::
