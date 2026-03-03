@@ -78,7 +78,7 @@ ckpt_file = base_model_dir / f"{MODEL_NAME}.pth"
 ov_model_path = base_model_dir / f"{MODEL_NAME}.xml"
 
 # Demo video path
-video_url = "https://storage.openvinotoolkit.org/data/test_data/videos/face-demographics-walking.mp4"
+video_url = "https://www.pexels.com/download/video/6130537"
 video_path = videos_dir / "face-demographics-walking.mp4"
 
 
@@ -105,7 +105,18 @@ if not ckpt_file.exists():
 # 1b) Download the demo video if needed
 if not video_path.exists():
     print(f"Downloading 3D pose demo video from {video_url}")
-    urllib.request.urlretrieve(video_url, video_path)
+    # Pexels blocks the default Python user-agent; mimic a browser and
+    # send a valid Referer so the request matches typical browser usage.
+    req = urllib.request.Request(
+        video_url,
+        headers={
+            "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
+            "(KHTML, like Gecko) Chrome/120.0 Safari/537.36",
+            "Referer": "https://www.pexels.com/",
+        },
+    )
+    with urllib.request.urlopen(req) as resp, video_path.open("wb") as out_f:
+        shutil.copyfileobj(resp, out_f)
     print(f"Saved 3D pose demo video to {video_path}")
 
 
