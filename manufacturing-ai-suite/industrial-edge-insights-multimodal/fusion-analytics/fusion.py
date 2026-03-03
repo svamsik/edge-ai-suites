@@ -287,19 +287,19 @@ def fuse_firstcome(mode: Literal["AND", "OR"] = "AND") -> Optional[Dict[str, Any
 
     data_dict = {}
     ts_time = None
-    vision_rstp_time = None
+    vision_rtp_time = None
     # Extract anomaly decisions from both messages
     if source_queue == "vision":
         # Vision message processed first
         vision_confidence = source_entry["metadata"]["objects"][0]["classification_layer_name:output1"]["confidence"]
-        vision_rstp_time = source_entry["metadata"].get("rtp", {}).get("sender_ntp_unix_timestamp_ns")
+        vision_rtp_time = source_entry["metadata"].get("rtp", {}).get("sender_ntp_unix_timestamp_ns")
         ts_time = target_entry["time"]
         timeseries_anomaly = target_entry["anomaly_status"]
         data_dict = source_entry
     else:
         # Time-series message processed first
         vision_confidence = target_entry["metadata"]["objects"][0]["classification_layer_name:output1"]["confidence"]
-        vision_rstp_time = target_entry["metadata"].get("rtp", {}).get("sender_ntp_unix_timestamp_ns")
+        vision_rtp_time = target_entry["metadata"].get("rtp", {}).get("sender_ntp_unix_timestamp_ns")
         ts_time = source_entry["time"]
         timeseries_anomaly = source_entry["anomaly_status"]
         data_dict = target_entry
@@ -320,7 +320,10 @@ def fuse_firstcome(mode: Literal["AND", "OR"] = "AND") -> Optional[Dict[str, Any
     else:  # mode == "OR"
         # Either system detecting anomaly triggers alert
         fused_decision = vision_anomaly | timeseries_anomaly
-    logger.info(f"Vision_Anomaly Type: {vision_classification}, Vision anomaly: {vision_anomaly}, TS anomaly: {timeseries_anomaly} fused decision: {fused_decision} time diff between RSTP and ts: {diff_timestamps_ns(vision_rstp_time, ts_time)['ms']:.3f} ms")
+    
+    time_diff = diff_timestamps_ns(vision_rtp_time, ts_time) if vision_rtp_time is not None else None
+
+    logger.info(f"Vision_Anomaly Type: {vision_classification}, Vision anomaly: {vision_anomaly}, TS anomaly: {timeseries_anomaly} fused decision: {fused_decision} time diff between RTP and ts: {time_diff['ms']:.3f} ms" if time_diff is not None else "N/A")
     return {
         "from": source_entry,
         "nearest": target_entry,
@@ -331,7 +334,7 @@ def fuse_firstcome(mode: Literal["AND", "OR"] = "AND") -> Optional[Dict[str, Any
         "vision_anomaly": vision_anomaly,
         "timeseries_anomaly": timeseries_anomaly,
         "vision_classification": vision_classification,
-        "src_time_diff_ms": diff_timestamps_ns(vision_rstp_time, ts_time)['ms'] if vision_rstp_time is not None else None
+        "src_time_diff_ms": time_diff['ms'] if time_diff is not None else None
     }
 
 
