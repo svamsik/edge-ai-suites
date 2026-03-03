@@ -24,24 +24,20 @@ if [ ! -d "${SOURCE}/dlstreamer-pipeline-server/videos" ] || [ -z "$(find "${SOU
 
   mkdir -p "${VIDEO_DIR}"
   
-  # Clone video repository with LFS
+  # Clone video repository with LFS (files are automatically downloaded during clone)
   TEMP_DIR=$(mktemp -d)
   git clone --branch ${VIDEO_BRANCH} --depth 1 ${VIDEO_REPO} ${TEMP_DIR}
-  cd ${TEMP_DIR}
-  git lfs pull
   
   for VIDEO in "${VIDEOS[@]}"; do
     echo "Copying ${VIDEO}..."
-    cp "videos/${VIDEO}" "${VIDEO_DIR}/${VIDEO}"
+    cp "${TEMP_DIR}/videos/${VIDEO}" "${VIDEO_DIR}/${VIDEO}"
     if [ ! -f "${VIDEO_DIR}/${VIDEO}" ]; then
         echo "Error: Failed to copy ${VIDEO}"
-        cd -
         rm -rf ${TEMP_DIR}
         exit 1
     fi
   done
   
-  cd -
   rm -rf ${TEMP_DIR}
 fi
 
