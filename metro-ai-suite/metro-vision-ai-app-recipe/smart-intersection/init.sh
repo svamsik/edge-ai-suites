@@ -23,9 +23,18 @@ if [ ! -d "${SOURCE}/dlstreamer-pipeline-server/videos" ] || [ -z "$(find "${SOU
   VIDEO_DIR="${SOURCE}/dlstreamer-pipeline-server/videos"
 
   mkdir -p "${VIDEO_DIR}"
+  
+  echo "Downloading videos in parallel..."
   for VIDEO in "${VIDEOS[@]}"; do
-    echo "Downloading ${VIDEO}..."
-    curl -k -L "${VIDEO_URL}/${VIDEO}" -o "${VIDEO_DIR}/${VIDEO}"
+    curl -k -L -s "${VIDEO_URL}/${VIDEO}" -o "${VIDEO_DIR}/${VIDEO}" &
+  done
+  
+  # Dummy download to potentially improve bandwidth allocation
+  curl -k -L -s "${VIDEO_URL}/LICENSE" -o "${VIDEO_DIR}/LICENSE" &
+  
+  wait
+  
+  for VIDEO in "${VIDEOS[@]}"; do
     if [ ! -f "${VIDEO_DIR}/${VIDEO}" ]; then
         echo "Error: Failed to download ${VIDEO}"
         exit 1
