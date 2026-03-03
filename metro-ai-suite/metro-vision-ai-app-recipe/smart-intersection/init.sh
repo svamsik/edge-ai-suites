@@ -17,28 +17,20 @@ echo "UID=$USER_UID" > .env
 echo "GID=$USER_GID" >> .env
 
 if [ ! -d "${SOURCE}/dlstreamer-pipeline-server/videos" ] || [ -z "$(find "${SOURCE}/dlstreamer-pipeline-server/videos" -type f -name "*.ts" 2>/dev/null)" ]; then
-  VIDEO_REPO="https://github.com/open-edge-platform/edge-ai-resources.git"
   VIDEO_BRANCH="ashish/si-videos"
+  VIDEO_URL="https://github.com/open-edge-platform/edge-ai-resources/raw/refs/heads/${VIDEO_BRANCH}/videos"
   VIDEOS=("1122east_h264.ts" "1122west_h264.ts" "1122north_h264.ts" "1122south_h264.ts")
   VIDEO_DIR="${SOURCE}/dlstreamer-pipeline-server/videos"
 
   mkdir -p "${VIDEO_DIR}"
-  
-  # Clone video repository with LFS (files are automatically downloaded during clone)
-  TEMP_DIR=$(mktemp -d)
-  git clone --branch ${VIDEO_BRANCH} --depth 1 ${VIDEO_REPO} ${TEMP_DIR}
-  
   for VIDEO in "${VIDEOS[@]}"; do
-    echo "Copying ${VIDEO}..."
-    cp "${TEMP_DIR}/videos/${VIDEO}" "${VIDEO_DIR}/${VIDEO}"
+    echo "Downloading ${VIDEO}..."
+    curl -k -L "${VIDEO_URL}/${VIDEO}" -o "${VIDEO_DIR}/${VIDEO}"
     if [ ! -f "${VIDEO_DIR}/${VIDEO}" ]; then
-        echo "Error: Failed to copy ${VIDEO}"
-        rm -rf ${TEMP_DIR}
+        echo "Error: Failed to download ${VIDEO}"
         exit 1
     fi
   done
-  
-  rm -rf ${TEMP_DIR}
 fi
 
 # Copy files to chart
