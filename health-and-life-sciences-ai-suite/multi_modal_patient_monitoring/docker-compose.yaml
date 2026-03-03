@@ -22,6 +22,7 @@ services:
       - ./configs/model-config.yaml:/app/configs/model-config.yaml:ro
       - ./models:/models
       - ./videos:/videos
+      - ./services/3d-pose-estimation/videos:/source-videos:ro
   
   patient-monitoring-aggregator:
     build:

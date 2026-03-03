@@ -77,8 +77,11 @@ ckpt_file = base_model_dir / f"{MODEL_NAME}.pth"
 # Final OpenVINO IR path
 ov_model_path = base_model_dir / f"{MODEL_NAME}.xml"
 
-# Demo video path
+# Demo video paths
+# Prefer copying a local video mounted at /source-videos, falling back
+# to a direct download only if the local file is not available.
 video_url = "https://storage.openvinotoolkit.org/data/test_data/videos/face-demographics-walking.mp4"
+source_video_path = Path("/source-videos/face-demographics-walking.mp4")
 video_path = videos_dir / "face-demographics-walking.mp4"
 
 
@@ -102,11 +105,21 @@ if not ckpt_file.exists():
     print("Checkpoint extraction complete")
 
 
-# 1b) Download the demo video if needed
+# 1b) Ensure the demo video is available
 if not video_path.exists():
-    print(f"Downloading 3D pose demo video from {video_url}")
-    urllib.request.urlretrieve(video_url, video_path)
-    print(f"Saved 3D pose demo video to {video_path}")
+    print(f"Preparing 3D pose demo video at {video_path}")
+
+    if source_video_path.exists():
+        print(f"Found local demo video at {source_video_path}, copying...")
+        shutil.copy2(source_video_path, video_path)
+        print(f"Copied 3D pose demo video from {source_video_path} to {video_path}")
+    else:
+        print(
+            f"Local demo video not found at {source_video_path}, "
+            f"downloading from {video_url} instead..."
+        )
+        urllib.request.urlretrieve(video_url, video_path)
+        print(f"Saved 3D pose demo video to {video_path}")
 
 
 # 2) Convert the PyTorch model to OpenVINO IR if it doesn't already exist

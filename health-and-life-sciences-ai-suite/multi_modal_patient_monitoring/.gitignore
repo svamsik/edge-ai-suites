@@ -51,6 +51,7 @@ videos/*.avi
 !services/rppg-service/models/group1-shard1of1.bin
 !services/rppg-service/models/*.xml
 !services/rppg-service/videos/sample.mp4
+!services/3d-pose-estimation/videos/face-demographics-walking.mp4
 
 # Keep directory structure
 !models/.gitkeep
