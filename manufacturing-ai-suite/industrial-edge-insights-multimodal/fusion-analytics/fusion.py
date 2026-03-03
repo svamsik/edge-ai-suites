@@ -69,10 +69,6 @@ logger.debug(type(FUSION_MODE), FUSION_MODE)
 if FUSION_MODE not in ["AND", "OR"]:
     raise ValueError(f"FUSION_MODE must be 'AND' or 'OR' given value is {FUSION_MODE}")
 
-
-CLEAR_TS_QUEUE = False
-
-
 influx_client = None
 # ===================== UTILITY FUNCTIONS =====================
 
@@ -187,11 +183,6 @@ def on_message(client, userdata, msg):
             else:
                 time = payload["metadata"]["rtp"]["sender_ntp_unix_timestamp_ns"]
                 queues["vision"].append(payload)
-                global CLEAR_TS_QUEUE
-                if CLEAR_TS_QUEUE:
-                    logger.info("Cleared time-series queue after processing vision message with RTP timestamp")
-                    queues["ts"].clear()
-                    CLEAR_TS_QUEUE = False
             
             # Debug: uncomment to see incoming messages
             # logger.info(f"Received from Vision: {payload}")

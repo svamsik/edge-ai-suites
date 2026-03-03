@@ -107,8 +107,6 @@ cd edge-ai-suites/manufacturing-ai-suite/industrial-edge-insights-multimodal
 
 ## Verify the Weld Defect Detection Results
 
-
-
 1. Get into the InfluxDB* container.
 
    > **Note:** Use `kubectl exec -it <influxdb-pod-name> -n <namespace> -- /bin/bash` for the helm deployment
