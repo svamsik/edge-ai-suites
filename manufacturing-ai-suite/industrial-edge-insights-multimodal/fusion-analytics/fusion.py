@@ -69,6 +69,10 @@ logger.debug(type(FUSION_MODE), FUSION_MODE)
 if FUSION_MODE not in ["AND", "OR"]:
     raise ValueError(f"FUSION_MODE must be 'AND' or 'OR' given value is {FUSION_MODE}")
 
+
+CLEAR_TS_QUEUE = False
+
+
 influx_client = None
 # ===================== UTILITY FUNCTIONS =====================
 
@@ -89,7 +93,7 @@ def find_nearest(buf, ts, type):
     
     # Find the message with minimum timestamp difference
     if type == "vision":
-        # Vision messages have timestamp in metadata.time
+        # Vision messages have timestamp in metadata.rtp.sender_ntp_unix_timestamp_ns
         nearest_index, nearest_item = min(enumerate(buf), key=lambda x: abs(x[1]["metadata"]["rtp"]["sender_ntp_unix_timestamp_ns"] - ts))
         diff = abs(nearest_item["metadata"]["rtp"]["sender_ntp_unix_timestamp_ns"] - ts)
     elif type == "timeseries":
@@ -177,13 +181,17 @@ def on_message(client, userdata, msg):
             
         elif msg.topic == VISION_TOPIC:
             # Process vision-based defect detection message
-            system_time = payload["metadata"]["rtp"]["sender_ntp_unix_timestamp_ns"]
-            time = payload["metadata"]["time"]
-
-            logger.debug(f"Received vision message with system timestamp: ({system_time} ns epoch and metadata timestamp: {time} ({time} ns epoch \
-                        time diff: {diff_timestamps_ns(time, system_time)['ms']:.3f} ms)")
-
-            queues["vision"].append(payload)
+            if "metadata" not in payload or "rtp" not in payload["metadata"] or "sender_ntp_unix_timestamp_ns" not in payload["metadata"]["rtp"]:
+                logger.warning(f"missing RTP timestamp metadata in vision message. Skipping timestamp-based fusion for frame_id: {payload['metadata'].get('frame_id', 'unknown')}")
+                time = payload["metadata"]["time"]
+            else:
+                time = payload["metadata"]["rtp"]["sender_ntp_unix_timestamp_ns"]
+                queues["vision"].append(payload)
+                global CLEAR_TS_QUEUE
+                if CLEAR_TS_QUEUE:
+                    logger.info("Cleared time-series queue after processing vision message with RTP timestamp")
+                    queues["ts"].clear()
+                    CLEAR_TS_QUEUE = False
             
             # Debug: uncomment to see incoming messages
             # logger.info(f"Received from Vision: {payload}")
@@ -287,14 +295,12 @@ def fuse_firstcome(mode: Literal["AND", "OR"] = "AND") -> Optional[Dict[str, Any
     vision_classification = "No Label"
 
     data_dict = {}
-    vision_time = None
     ts_time = None
     vision_rstp_time = None
     # Extract anomaly decisions from both messages
     if source_queue == "vision":
         # Vision message processed first
         vision_confidence = source_entry["metadata"]["objects"][0]["classification_layer_name:output1"]["confidence"]
-        vision_time = source_entry["metadata"]["time"]
         vision_rstp_time = source_entry["metadata"].get("rtp", {}).get("sender_ntp_unix_timestamp_ns")
         ts_time = target_entry["time"]
         timeseries_anomaly = target_entry["anomaly_status"]
@@ -302,16 +308,11 @@ def fuse_firstcome(mode: Literal["AND", "OR"] = "AND") -> Optional[Dict[str, Any
     else:
         # Time-series message processed first
         vision_confidence = target_entry["metadata"]["objects"][0]["classification_layer_name:output1"]["confidence"]
-        vision_time = target_entry["metadata"]["time"]
         vision_rstp_time = target_entry["metadata"].get("rtp", {}).get("sender_ntp_unix_timestamp_ns")
         ts_time = source_entry["time"]
         timeseries_anomaly = source_entry["anomaly_status"]
         data_dict = target_entry
-    
 
-
-    logger.info(f"Vision timestamp: {vision_time} ns epoch, RSTP timestamp: {vision_rstp_time} ns epoch, Time-series timestamp: {ts_time} ns epoch \
-                 time diff between vision and ts: {diff_timestamps_ns(vision_time, ts_time)['ms']:.3f} ms, \time diff between vision RSTP and ts: {diff_timestamps_ns(vision_rstp_time, ts_time)['ms']:.3f} ms")
     if "metadata" in data_dict and "label" in data_dict["metadata"]["objects"][0]["classification_layer_name:output1"]:
             vision_classification = str(data_dict["metadata"]["objects"][0]["classification_layer_name:output1"]["label"])
     
@@ -328,7 +329,7 @@ def fuse_firstcome(mode: Literal["AND", "OR"] = "AND") -> Optional[Dict[str, Any
     else:  # mode == "OR"
         # Either system detecting anomaly triggers alert
         fused_decision = vision_anomaly | timeseries_anomaly
-    logger.info(f"Vision_Anomaly Type: {vision_classification}, Vision anomaly: {vision_anomaly}, TS anomaly: {timeseries_anomaly} fused decision: {fused_decision}")
+    logger.info(f"Vision_Anomaly Type: {vision_classification}, Vision anomaly: {vision_anomaly}, TS anomaly: {timeseries_anomaly} fused decision: {fused_decision} time diff between RSTP and ts: {diff_timestamps_ns(vision_rstp_time, ts_time)['ms']:.3f} ms")
     return {
         "from": source_entry,
         "nearest": target_entry,
@@ -339,8 +340,7 @@ def fuse_firstcome(mode: Literal["AND", "OR"] = "AND") -> Optional[Dict[str, Any
         "vision_anomaly": vision_anomaly,
         "timeseries_anomaly": timeseries_anomaly,
         "vision_classification": vision_classification,
-        "time_diff_ms": diff_timestamps_ns(vision_time, ts_time)['ms'],
-        "rtsp_time_diff_ms": diff_timestamps_ns(vision_rstp_time, ts_time)['ms'] if vision_rstp_time is not None else None
+        "src_time_diff_ms": diff_timestamps_ns(vision_rstp_time, ts_time)['ms'] if vision_rstp_time is not None else None
     }
 
 
@@ -404,8 +404,7 @@ def main():
                             ),
                             "vision_anomaly": int(result["vision_anomaly"]),
                             "timeseries_anomaly": int(result["timeseries_anomaly"]),
-                            "vision_ts_diff_ms": float(result["time_diff_ms"]) if result["time_diff_ms"] is not None else None,
-                            "vision_rtsp_ts_diff_ms": float(result["rtsp_time_diff_ms"]) if result["rtsp_time_diff_ms"] is not None else None
+                            "vision_rtsp_ts_diff_ms": float(result["src_time_diff_ms"]) if result["src_time_diff_ms"] is not None else None
                         }
                     }]
                     influx_client.write_points(json_body)
