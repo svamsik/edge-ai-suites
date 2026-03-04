@@ -15,14 +15,20 @@ import openvino as ov
 CONFIG_PATH = Path("/app/configs/model-config.yaml")
 
 
-def _load_pose_model_config() -> tuple[str, str, str]:
-    """Load 3D pose model name, target_dir, and video_dir from config.
+def _load_pose_model_config() -> tuple[str, str, str, str, str]:
+    """Load 3D pose model settings from config.
 
     This function expects /app/configs/model-config.yaml to exist and to
-    define pose-3d.models[0] with at least name, target_dir, and
-    video_dir. If any of these are missing or the file is not readable,
-    the script will raise and fail fast instead of using hardcoded
-    defaults.
+    define pose-3d.models[0] with at least:
+
+      - name
+      - target_dir
+      - model_url
+      - video_dir
+      - video_url
+
+    If any of these are missing or the file is not readable, the script
+    will raise and fail fast instead of using hardcoded defaults.
     """
     if not CONFIG_PATH.exists():
         raise FileNotFoundError(
@@ -45,17 +51,26 @@ def _load_pose_model_config() -> tuple[str, str, str]:
     first = models[0] or {}
     name = first.get("name")
     target_dir = first.get("target_dir")
+    model_url = first.get("model_url")
     video_dir = first.get("video_dir")
+    video_url = first.get("video_url")
 
-    if not name or not target_dir or not video_dir:
+    if not name or not target_dir or not model_url or not video_dir or not video_url:
         raise ValueError(
-            "pose-3d.models[0] must define name, target_dir, and video_dir in model-config.yaml."
+            "pose-3d.models[0] must define name, target_dir, model_url, "
+            "video_dir, and video_url in model-config.yaml."
         )
 
-    return str(name), str(target_dir), str(video_dir)
+    return (
+        str(name),
+        str(target_dir),
+        str(video_dir),
+        str(model_url),
+        str(video_url),
+    )
 
 
-MODEL_NAME, MODEL_TARGET_DIR, MODEL_VIDEO_DIR = _load_pose_model_config()
+MODEL_NAME, MODEL_TARGET_DIR, MODEL_VIDEO_DIR, MODEL_URL, VIDEO_URL = _load_pose_model_config()
 
 # Directory where the 3D pose model assets will be stored
 # Use the same default as omz-model-download.sh: /models/3d-pose
@@ -78,22 +93,14 @@ ckpt_file = base_model_dir / f"{MODEL_NAME}.pth"
 ov_model_path = base_model_dir / f"{MODEL_NAME}.xml"
 
 # Demo video path
-video_url = "https://www.pexels.com/download/video/6130537"
 video_path = videos_dir / "face-demographics-walking.mp4"
 
 
 # 1) Download and extract the .pth checkpoint if needed
 if not ckpt_file.exists():
-    # URL still points to the default OMZ model; MODEL_NAME controls
-    # the local file naming via config.
-    url = (
-        "https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/"
-        "human-pose-estimation-3d-0001/human-pose-estimation-3d.tar.gz"
-    )
-
     if not tar_path.exists():
-        print(f"Downloading 3D pose checkpoint from {url}")
-        urllib.request.urlretrieve(url, tar_path)
+        print(f"Downloading 3D pose checkpoint from {MODEL_URL}")
+        urllib.request.urlretrieve(MODEL_URL, tar_path)
         print(f"Saved checkpoint archive to {tar_path}")
 
     print(f"Extracting checkpoint archive into {base_model_dir}")
@@ -104,11 +111,11 @@ if not ckpt_file.exists():
 
 # 1b) Download the demo video if needed
 if not video_path.exists():
-    print(f"Downloading 3D pose demo video from {video_url}")
+    print(f"Downloading 3D pose demo video from {VIDEO_URL}")
     # Pexels blocks the default Python user-agent; mimic a browser and
     # send a valid Referer so the request matches typical browser usage.
     req = urllib.request.Request(
-        video_url,
+        VIDEO_URL,
         headers={
             "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
             "(KHTML, like Gecko) Chrome/120.0 Safari/537.36",
