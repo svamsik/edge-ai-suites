@@ -17,7 +17,7 @@ echo "UID=$USER_UID" > .env
 echo "GID=$USER_GID" >> .env
 
 if [ ! -d "${SOURCE}/dlstreamer-pipeline-server/videos" ] || [ -z "$(find "${SOURCE}/dlstreamer-pipeline-server/videos" -type f -name "*.ts" 2>/dev/null)" ]; then
-  VIDEO_BRANCH="ashish/si-videos"
+  VIDEO_BRANCH="main"
   VIDEO_URL="https://github.com/open-edge-platform/edge-ai-resources/raw/refs/heads/${VIDEO_BRANCH}/videos"
   VIDEOS=("1122east_h264.ts" "1122west_h264.ts" "1122north_h264.ts" "1122south_h264.ts")
   VIDEO_DIR="${SOURCE}/dlstreamer-pipeline-server/videos"
