@@ -46,4 +46,6 @@ as follows:
 ./sample_start.sh npu
 ```
 
+> **Note:** Unlike the other pipelines, the `yolov11s_npu` pipeline uses yolov11s FP16 model instead of yolov11s INT8 model. This is because there are problems when running the INT8 model with NPU driver v1.28.
+
 Go to Grafana as explained in [Get Started](../get-started.md) to view the dashboard.
