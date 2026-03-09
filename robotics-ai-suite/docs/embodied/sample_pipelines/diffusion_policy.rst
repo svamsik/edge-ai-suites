@@ -130,11 +130,14 @@ Inference
 
     You need to set the ``--output_dir`` to save the converted model to ``~/ov_models/pushT/`` directory.
 
-The expectation result of this step is that you will have the following files in ``~/ov_models/pushT/`` directory:
+Run the following command to list the converted models. The output should include the files below:
 
 .. code-block:: bash
 
     ls ~/ov_models/pushT/ -l
+
+.. code-block:: text
+
     -rw-rw-r-- ... image_c884_obs_encoder_onepass.bin
     -rw-rw-r-- ... image_c884_obs_encoder_onepass.xml
     -rw-rw-r-- ... image_c884_unet_onepass.bin
@@ -168,6 +171,9 @@ The expectation result of this step is that you will have the following files in
 .. code-block:: bash
 
     ls <output_dir> -l
+
+.. code-block:: text
+
     -rw-rw-r-- ... eval_log.json
     drwxrwxr-x ... media
 
