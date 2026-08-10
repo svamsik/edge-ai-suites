@@ -19,6 +19,9 @@ export default function App() {
 
   const {
     recording,
+    wakewordEnabled,
+    wakewordListening,
+    wakewordScore,
     status,
     messages,
     partialUser,
@@ -26,10 +29,13 @@ export default function App() {
     micAnalyser,
     responseAnalyser,
     responseActive,
+    resetIn,
     sessionPerf,
     start,
     stop,
-  } = useVoiceSession();
+    setWakewordEnabled,
+    reset,
+  } = useVoiceSession(deviceId);
   const micLevel = useAudioLevel(micAnalyser, recording);
   const perfMetrics = usePerformanceMetrics();
 
@@ -66,8 +72,36 @@ export default function App() {
       </header>
 
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-[320px_1fr] xl:grid-cols-[320px_minmax(0,1fr)_360px]">
-        {/* Left: ingestion + device + preview */}
+        {/* Left column: microphone tile, knowledge base tile, uploaded files */}
         <aside className="flex min-h-0 flex-col gap-4">
+          <section className="rounded-xl border border-blue-200 bg-white p-4">
+            <DeviceSelector value={deviceId} onChange={setDeviceId} disabled={recording} />
+            <div className="mt-3 border-t border-blue-100 pt-3">
+              <label className="flex cursor-pointer items-center justify-between gap-3">
+                <div>
+                  <p className="text-sm font-semibold text-black">Wake-word mode</p>
+                </div>
+                <span className="relative inline-flex h-6 w-11 shrink-0 items-center">
+                  <input
+                    type="checkbox"
+                    checked={wakewordEnabled}
+                    onChange={(e) => setWakewordEnabled(e.target.checked)}
+                    disabled={recording}
+                    className="peer sr-only"
+                  />
+                  <span className="absolute inset-0 rounded-full bg-gray-300 transition-colors peer-checked:bg-intel-blue peer-disabled:opacity-50" />
+                  <span className="absolute left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform peer-checked:translate-x-5" />
+                </span>
+              </label>
+              {wakewordListening && (
+                <p className="mt-2 text-xs font-medium text-intel-blue">Listening for wake word...</p>
+              )}
+              <p className="mt-2 text-xs text-black/70">
+                score: <span className="font-semibold text-intel-blue">{wakewordScore.toFixed(2)}</span>
+              </p>
+            </div>
+          </section>
+
           <section className="rounded-xl border border-blue-200 bg-white p-4">
             <h2 className="mb-3 text-sm font-semibold text-black">Knowledge base</h2>
             <IngestionPanel
@@ -78,17 +112,13 @@ export default function App() {
             />
           </section>
 
-          <section className="rounded-xl border border-blue-200 bg-white p-4">
-            <DeviceSelector value={deviceId} onChange={setDeviceId} disabled={recording} />
-          </section>
-
           <section className="min-h-[240px] flex-1">
             <UploadedFiles files={files} onRemove={handleRemoveFile} disabled={recording} />
           </section>
         </aside>
 
-        {/* Center: chat + voice */}
-        <main className="flex min-h-0 flex-col gap-4">
+        {/* Center tile: chat sub-tile + voice sub-tile */}
+        <main className="flex min-h-0 flex-col gap-4 rounded-xl border border-blue-200 bg-white p-4">
           <div className="min-h-[320px] flex-1">
             <Chat
               messages={messages}
@@ -98,7 +128,7 @@ export default function App() {
             />
           </div>
 
-          <section className="rounded-xl border border-blue-200 bg-white p-4">
+          <section className="rounded-lg border border-blue-100 bg-slate-50 p-4">
             <div className="grid grid-cols-1 gap-4">
               <Visualizer
                 analyser={responseAnalyser}
@@ -114,22 +144,44 @@ export default function App() {
                 inputLevel={micLevel}
                 onStart={() => start(deviceId)}
                 onStop={stop}
+                disabled={wakewordListening || (wakewordEnabled && !recording)}
               />
               <div className="flex-1 space-y-2">
                 <p className="text-sm text-black/80">{status}</p>
-                <Visualizer
-                  analyser={micAnalyser}
-                  active={recording}
-                  color="#0068B5"
-                  label="Your voice"
-                  compact
-                />
+                <div className="flex items-end gap-4">
+                  <div className="flex-1">
+                    <Visualizer
+                      analyser={micAnalyser}
+                      active={recording}
+                      color="#0068B5"
+                      label="Your voice"
+                      compact
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={reset}
+                    disabled={recording}
+                    title="Start a new conversation"
+                    className="shrink-0 rounded-lg border border-blue-200 px-4 py-2 text-sm font-semibold text-intel-blue transition hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    New session
+                  </button>
+                  {resetIn !== null && (
+                    <span
+                      title="Conversation auto-resets when the timer reaches zero"
+                      className="shrink-0 tabular-nums text-sm font-medium text-black/60"
+                    >
+                      Auto-reset in {resetIn}s
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
           </section>
         </main>
 
-        {/* Right: metrics */}
+        {/* Right tile: metrics */}
         <div className="min-h-0 xl:row-span-1">
           <MetricsPanel
             metrics={perfMetrics}
