@@ -115,7 +115,7 @@ make uavsdk-up
 
 > **Note:** Video streams are not available until the UAV is armed and actively on a mission.
 
-The following sequence arms the UAV, commands a takeoff to 10 m, holds for 120 seconds, then lands:
+Run the simple UAV mission in a persistent terminal window to keep the simulation active. The following sequence arms the UAV, commands a takeoff to 10 m, holds for 120 seconds, then lands:
 
 ```bash
 curl -X POST http://localhost:8080/action/arm
@@ -127,6 +127,8 @@ curl -X POST http://localhost:8080/action/land
 ```
 
 ### 6. Start inference pipelines
+
+> Open a new terminal window and launch the inference pipeline to begin processing the video stream.
 
 Two options are available depending on your use case:
 
@@ -146,7 +148,7 @@ make start-rtsp DEVICE=all     # all three cameras simultaneously
 > `DEVICE=npu` requires `NPU_DEVICE` to have been detected during `make init` — falls back to GPU otherwise.
 
 **uav-mission-compute-sdk mode** — output streams (only the selected `DEVICE` is active, unless `DEVICE=all`; available after drone arms):
-```
+```text
 rtsp://localhost:8555/nadir      (nadir camera, CPU)
 rtsp://localhost:8555/forward    (forward camera, GPU)
 rtsp://localhost:8555/rear       (rear camera, NPU)

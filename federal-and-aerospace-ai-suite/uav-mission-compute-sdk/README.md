@@ -45,9 +45,11 @@ ls /dev/dri/renderD*
 ## Quick Start
 
 ```bash
-# 1. Create .env and detect GPU devices
+# 1. Create/populate .env and detect GPU devices
 make init
+```
 
+```bash
 # 2. Start core infra (PX4 + Gazebo + camera bridges + MQTT + RTSP + observability)
 make up-sim-camera
 ```
@@ -178,3 +180,4 @@ FFmpeg is an open source project licensed under LGPL and GPL. See https://www.ff
 
 GStreamer is an open source framework licensed under LGPL. See https://gstreamer.freedesktop.org/documentation/frequently-asked-questions/licensing.html. You are solely responsible for determining if your use of GStreamer requires any additional licenses. Intel is not responsible for obtaining any such licenses, nor liable for any licensing fees due, in connection with your use of GStreamer.
 
+Intel is committed to respecting human rights and avoiding complicity in human rights abuses. See Intel's [Global Human Rights Principles](https://www.intel.com/content/www/us/en/policy/policy-human-rights.html). Intel's products and software are intended only to be used in applications that do not cause or contribute to a violation of an internationally recognized human right.
